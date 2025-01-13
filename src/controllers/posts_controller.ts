@@ -1,4 +1,4 @@
-import postModel,{ Post }  from "../modules/post_modules";
+import postModel,{ Post }  from "../models/post_model";
 import { Request, Response } from "express";
 
 const addPost = async (req:Request, res:Response) => {

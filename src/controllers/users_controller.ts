@@ -1,4 +1,4 @@
-import userModel,{ User }  from "../modules/user_modules";
+import userModel,{ User }  from "../models/user_model";
 import { Request, Response } from "express";
 
 // Create user

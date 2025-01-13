@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import userModel, { User } from "../modules/user_modules";
+import userModel, { User } from "../models/user_model";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Document } from "mongoose";

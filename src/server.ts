@@ -57,4 +57,17 @@ const initApp = () => {
   });
 };
 
+const port = process.env.PORT || 3000;
+
+mongoose
+  .connect(process.env.DATABASE_URL || "mongodb://localhost/my_database")
+  .then(() => {
+    app.listen(port, () => {
+      console.log(`Server is running on port ${port}`);
+    });
+  })
+  .catch((err) => {
+    console.log("Error connecting to MongoDB:", err.message);
+  });
+
 export default initApp;
