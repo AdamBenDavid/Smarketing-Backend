@@ -12,11 +12,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const post_modules_1 = __importDefault(require("../modules/post_modules"));
+const post_model_1 = __importDefault(require("../models/post_model"));
 const addPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log("add post");
     try {
-        const post = new post_modules_1.default(req.body);
+        const post = new post_model_1.default(req.body);
         yield post.save();
         res.send(post);
     }
@@ -27,7 +27,7 @@ const addPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 const getAllPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         console.log("get all posts");
-        const posts = yield post_modules_1.default.find();
+        const posts = yield post_model_1.default.find();
         console.log("posts " + posts);
         res.send(posts);
     }
@@ -38,7 +38,7 @@ const getAllPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 const getPostById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const postId = req.params.id;
     try {
-        const post = yield post_modules_1.default.findById(postId);
+        const post = yield post_model_1.default.findById(postId);
         if (post != null) {
             res.status(200).json(post);
         }
@@ -52,7 +52,7 @@ const getPostById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 });
 const deletePosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const posts = yield post_modules_1.default.deleteMany();
+        const posts = yield post_model_1.default.deleteMany();
         res.send(posts);
     }
     catch (error) {
@@ -63,7 +63,7 @@ const updatePostById = (req, res) => __awaiter(void 0, void 0, void 0, function*
     const postId = req.params.id;
     const updatedData = req.body;
     try {
-        const updatedPost = yield post_modules_1.default.findByIdAndUpdate(postId, updatedData, {
+        const updatedPost = yield post_model_1.default.findByIdAndUpdate(postId, updatedData, {
             new: true,
         });
         if (!updatedPost) {
@@ -83,7 +83,7 @@ const getPostBySenderId = (req, res) => __awaiter(void 0, void 0, void 0, functi
         return res.status(400).json({ error: "Sender ID is required" });
     }
     try {
-        const posts = yield post_modules_1.default.find({ senderId }); // חיפוש לפי senderId
+        const posts = yield post_model_1.default.find({ senderId }); // חיפוש לפי senderId
         if (posts.length === 0) {
             return res.status(404).json({ message: "No posts found for the given sender" });
         }
