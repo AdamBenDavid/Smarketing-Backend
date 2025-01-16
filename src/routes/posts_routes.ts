@@ -2,6 +2,8 @@ import express from "express";
 const router = express.Router();
 import postsController from "../controllers/posts_controller";
 import { authMiddleware } from "../controllers/auth_controller";
+import { Router } from 'express';
+import * as postController from '../controllers/post.controller';
 
 /**
  * @swagger
@@ -110,7 +112,7 @@ router.get("/filter", (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Post'
  */
-router.post("/", authMiddleware, postsController.addPost);
+router.post("/", authMiddleware, postController.createPost);
 
 /**
  * @swagger

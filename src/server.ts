@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-//adam ben david 208298257
-//aviv menahem 212292197
 import dotenv from "dotenv"
 dotenv.config();
 import mongoose from "mongoose";
@@ -19,7 +16,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/posts", postsRoutes);
 app.use("/comments", commentsRoutes);
 app.use("/users", usersRoutes);
-app.use("/auth",authRoutes );
+app.use("/auth", authRoutes);
 
 const options = {
   definition: {
@@ -36,28 +33,6 @@ const options = {
 const specs = swaggerJsDoc(options);
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
 
-
-const db = mongoose.connection;
-db.on("error", (error) => console.error(error));
-db.once("open", () => console.log("Connected to MongoDB!"));
-
-const initApp = () => {
-  return new Promise<Express>((resolve, reject) => {
-    if (!process.env.DB_CONNECT) {
-      reject("DB_CONNECT is not defined in .env file");
-    } else {
-      mongoose
-        .connect(process.env.DB_CONNECT)
-        .then(() => {
-          resolve(app);
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    }
-  });
-};
-
 const port = process.env.PORT || 3000;
 
 mongoose
@@ -71,20 +46,4 @@ mongoose
     console.log("Error connecting to MongoDB:", err.message);
   });
 
-export default initApp;
-=======
-import express, { Request, Response } from "express";
-
-const app = express();
-const PORT = 3000;
-
-app.use(express.json());
-
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello, TypeScript with Express!");
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is running at http://localhost:${PORT}`);
-});
->>>>>>> 898d68d93707fdba8e83ed858c71e6230d404a13
+export default app;
