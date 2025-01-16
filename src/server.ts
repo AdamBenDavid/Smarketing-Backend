@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 //adam ben david 208298257
 //aviv menahem 212292197
 import dotenv from "dotenv"
@@ -71,3 +72,19 @@ mongoose
   });
 
 export default initApp;
+=======
+import express, { Request, Response } from "express";
+
+const app = express();
+const PORT = 3000;
+
+app.use(express.json());
+
+app.get("/", (req: Request, res: Response) => {
+  res.send("Hello, TypeScript with Express!");
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is running at http://localhost:${PORT}`);
+});
+>>>>>>> 898d68d93707fdba8e83ed858c71e6230d404a13

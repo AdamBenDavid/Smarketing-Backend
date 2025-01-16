@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 # Ignore node_modules directory
 node_modules/
 
 # Ignore dist directory
 dist/
+=======
+node_modules
+>>>>>>> 898d68d93707fdba8e83ed858c71e6230d404a13

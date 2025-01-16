@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+<<<<<<< HEAD
     "module": "commonjs",
     "esModuleInterop": true,
     "target": "es6",
@@ -10,4 +11,15 @@
     "resolveJsonModule": true
   },
   "lib": ["es2015"]
+=======
+    "target": "ES6",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+>>>>>>> 898d68d93707fdba8e83ed858c71e6230d404a13
 }
