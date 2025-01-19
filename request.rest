@@ -80,10 +80,10 @@ Content-Type: application/json
 }
 
 ### get user by id
-GET http://localhost:3000/users/6777e5ad882ac9320dc35198
+GET http://localhost:3000/users/678d34a076762de0284d51cc
 
 ### update a password by id
-PUT http://localhost:3000/users/6777e5ad882ac9320dc35198
+PUT http://localhost:3000/users/678d34a076762de0284d51cc
 Content-Type: application/json
 
 {
@@ -118,7 +118,7 @@ POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-  "email": "adam@gmail",
+  "email": "eliav@gmail.com",
   "password": "1234"
 }
 
@@ -129,3 +129,33 @@ Content-Type: application/json
 {
   "email": "adam@gmail"
 }
+
+### Chat Routes ###
+
+### Get chat history between two users
+GET http://localhost:3000/chat/history/user1/user2
+
+### Send a test message (this will be handled by Socket.IO later)
+POST http://localhost:3000/chat
+Content-Type: application/json
+
+{
+  "senderId": "user1",
+  "receiverId": "user2",
+  "content": "Hello, this is a test message!"
+}
+
+### Chat Tests ###
+
+### Create a test message directly (to test our model and DB connection)
+POST http://localhost:3000/chat
+Content-Type: application/json
+
+{
+  "senderId": "test_user_1",
+  "receiverId": "test_user_2", 
+  "content": "Test message 1"
+}
+
+### Get chat history between test users
+GET http://localhost:3000/chat/history/test_user_1/test_user_2
