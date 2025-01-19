@@ -28,6 +28,18 @@ Content-Type: application/json
 ### EXTRA- delete all posts
 DELETE http://localhost:3000/posts
 
+### Create post for mock user
+POST http://localhost:3000/posts
+Content-Type: application/json
+
+{
+  "postData": "This is a test post from mock user",
+  "senderId": "current123"
+}
+
+### Get posts for mock user
+GET http://localhost:3000/posts/filter?senderId=current123
+
 ###########comments############
 ### create a comment
 POST http://localhost:3000/comments
@@ -62,7 +74,7 @@ POST http://localhost:3000/users
 Content-Type: application/json
 
 {
-  "email": "eliav@gmail",
+  "email": "eliav@gmail.com",
   "password": "1234",
   "favPat": "Crocodile"
 }

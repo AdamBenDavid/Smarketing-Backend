@@ -93,4 +93,35 @@ const getAllUsers = async (req:Request, res:Response) => {
     }
 }
 
-export default { createUser, getUserById, updatePasswordById, updateFavPatById, deleteUserById, getAllUsers };
+const updateProfile = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.params.id;
+    const { fullName } = req.body;
+    const profilePicture = req.file;
+
+    const updateData: any = { fullName };
+    if (profilePicture) {
+      // TODO: Upload image to cloud storage (e.g., AWS S3)
+      // For now, just store the file path
+      updateData.profilePicture = profilePicture.path;
+    }
+
+    const user = await userModel.findByIdAndUpdate(
+      userId,
+      updateData,
+      { new: true }
+    );
+
+    if (!user) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    res.status(500).json({ error: "Failed to update profile" });
+  }
+};
+
+export default { createUser, getUserById, updatePasswordById, updateFavPatById, deleteUserById, getAllUsers, updateProfile };

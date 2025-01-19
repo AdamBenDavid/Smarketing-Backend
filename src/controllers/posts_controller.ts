@@ -1,91 +1,78 @@
-import postModel,{ Post }  from "../models/post_model";
+import postModel, { Post } from "../models/post_model";
 import { Request, Response } from "express";
 
-const addPost = async (req:Request, res:Response) => {
+const addPost = async (req: Request, res: Response): Promise<void> => {
   console.log("add post");
   try {
     const post = new postModel(req.body);
     await post.save();
-    res.send(post);
+    res.status(201).json(post);
   } catch (error) {
-    res.status(400).send
+    res.status(400).json({ error: "Failed to create post" });
   }
-}
+};
 
-const getAllPosts = async (req:Request, res:Response) => {
+const getAllPosts = async (req: Request, res: Response): Promise<void> => {
   try {
-    console.log("get all posts");
     const posts = await postModel.find();
-    console.log("posts " + posts);
-    res.send(posts);
+    res.status(200).json(posts);
   } catch (error) {
-    res.status(400).send(error);
+    res.status(500).json({ error: "Failed to fetch posts" });
   }
 };
 
-const getPostById = async (req:Request, res:Response) => {
-  const postId = req.params.id;
+const getPostById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const post = await postModel.findById(postId);
-    if (post != null) 
-    {
-      res.status(200).json(post);
+    const post = await postModel.findById(req.params.id);
+    if (!post) {
+      res.status(404).json({ error: "Post not found" });
+      return;
     }
-    else 
-    {
-      res.status(400).send("post not found");
-    }
+    res.status(200).json(post);
   } catch (error) {
-    res.status(400).send(error);
+    res.status(500).json({ error: "Failed to fetch post" });
   }
 };
 
-const deletePosts = async (req:Request, res:Response) => {
+const deletePosts = async (req: Request, res: Response): Promise<void> => {
   try {
-    const posts = await postModel.deleteMany();
-    res.send(posts);
+    await postModel.deleteMany({});
+    res.status(200).json({ message: "All posts deleted" });
   } catch (error) {
-    res.status(400).send(error);
+    res.status(500).json({ error: "Failed to delete posts" });
   }
 };
 
-const updatePostById = async (req:Request, res:Response) => {
-  const postId = req.params.id;
-  const updatedData = req.body;
-
+const updatePostById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const updatedPost = await postModel.findByIdAndUpdate(postId, updatedData, {
-      new: true,
-    });
-    if (!updatedPost) {
-      return res.status(404).send("Post not found");
+    const post = await postModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!post) {
+      res.status(404).json({ error: "Post not found" });
+      return;
     }
-    res.status(200).send(updatedPost);
+    res.status(200).json(post);
   } catch (error) {
-    res.status(400).send(error);
+    res.status(500).json({ error: "Failed to update post" });
   }
 };
 
 // Controller to get posts by sender
 //here
-const getPostBySenderId = async (req:Request, res:Response) => {
-  const senderId = req.query.senderId; // senderId מגיע מה-Query
-  if (!senderId) {
-    return res.status(400).json({ error: "Sender ID is required" });
-  }
-
+const getPostBySenderId = async (req: Request, res: Response): Promise<void> => {
   try {
-    const posts = await postModel.find({ senderId }); // חיפוש לפי senderId
-    
-    if (posts.length === 0) {
-      return res.status(404).json({ message: "No posts found for the given sender" });
-    }
-
+    const senderId = req.query.senderId as string;
+    const posts = await postModel.find({ senderId });
     res.status(200).json(posts);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch posts" });
   }
 };
 
-export default { addPost, getAllPosts, getPostById, deletePosts, updatePostById, getPostBySenderId };
+export default {
+  addPost,
+  getAllPosts,
+  getPostById,
+  deletePosts,
+  updatePostById,
+  getPostBySenderId
+};
