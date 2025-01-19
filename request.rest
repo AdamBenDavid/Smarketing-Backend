@@ -132,18 +132,56 @@ Content-Type: application/json
 
 ### Chat Routes ###
 
-### Get chat history between two users
-GET http://localhost:3000/chat/history/user1/user2
+### 1. Create a test user first (if not exists)
+POST http://localhost:3000/auth/register
+Content-Type: application/json
 
-### Send a test message (this will be handled by Socket.IO later)
+{
+  "email": "chattest1@test.com",
+  "password": "1234",
+  "favPat": "Dog"
+}
+
+### 2. Create another test user
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "email": "chattest2@test.com",
+  "password": "1234",
+  "favPat": "Cat"
+}
+
+### 3. Login first user to get ID
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "chattest1@test.com",
+  "password": "1234"
+}
+
+### 4. Login second user to get ID
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "chattest2@test.com",
+  "password": "1234"
+}
+
+### 5. Create a test message
 POST http://localhost:3000/chat
 Content-Type: application/json
 
 {
-  "senderId": "user1",
-  "receiverId": "user2",
+  "senderId": "678d3c507c5fc73914671307",
+  "receiverId": "678d3c577c5fc73914671309",
   "content": "Hello, this is a test message!"
 }
+
+### 6. Get chat history between users
+GET http://localhost:3000/chat/history/678d3c507c5fc73914671307/678d3c577c5fc73914671309
 
 ### Chat Tests ###
 
