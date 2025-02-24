@@ -22,7 +22,10 @@ const server = http.createServer(app);
 // Initialize Socket.IO
 initializeSocket(server);
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:5173', // Your frontend URL
+  credentials: true
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/posts", postsRoutes);
