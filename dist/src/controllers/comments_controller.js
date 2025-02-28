@@ -12,10 +12,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const comments_model_1 = __importDefault(require("../models/comments_model"));
+const comments_modules_1 = __importDefault(require("../modules/comments_modules"));
 const addComment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const comment = new comments_model_1.default(req.body);
+        const comment = new comments_modules_1.default(req.body);
         yield comment.save();
         res.send(comment);
     }
@@ -25,7 +25,7 @@ const addComment = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 });
 const getAllComments = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const comments = yield comments_model_1.default.find();
+        const comments = yield comments_modules_1.default.find();
         res.send(comments);
     }
     catch (error) {
@@ -35,7 +35,7 @@ const getAllComments = (req, res) => __awaiter(void 0, void 0, void 0, function*
 const getCommentById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const commentId = req.params.id;
     try {
-        const comment = yield comments_model_1.default.findById(commentId);
+        const comment = yield comments_modules_1.default.findById(commentId);
         if (comment != null)
             res.send(comment);
         else
@@ -49,7 +49,7 @@ const updateCommentById = (req, res) => __awaiter(void 0, void 0, void 0, functi
     const commentId = req.params.id;
     const updatedData = req.body;
     try {
-        const updatedPost = yield comments_model_1.default.findByIdAndUpdate(commentId, updatedData, {
+        const updatedPost = yield comments_modules_1.default.findByIdAndUpdate(commentId, updatedData, {
             new: true,
         });
         if (!updatedPost) {
@@ -64,7 +64,7 @@ const updateCommentById = (req, res) => __awaiter(void 0, void 0, void 0, functi
 const deleteCommentById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const commentId = req.params.id;
     try {
-        const comment = yield comments_model_1.default.findByIdAndDelete(commentId);
+        const comment = yield comments_modules_1.default.findByIdAndDelete(commentId);
         if (!comment) {
             return res.status(404).send("Comment not found");
         }

@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import userModel, { User } from "../models/user_model";
+import userModel, { User } from "../modules/user_modules";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Document } from "mongoose";
+import { log } from "console";
 
 const register = async (req: Request, res: Response) => {
   try {
@@ -58,17 +59,13 @@ const login = async (req: Request, res: Response) => {
   try {
     const user = await userModel.findOne({ email: req.body.email });
     if (!user) {
-
-      res.status(400).send("wronddg username or password");
+      res.status(400).send("wrong username or password");
       return;
     }
-
-    // @TODO: remove this later
-    // const validPassword = await bcrypt.compare(
-    //   req.body.password,
-    //   user.password
-    // );
-    const validPassword = user.password === req.body.password;
+    const validPassword = await bcrypt.compare(
+      req.body.password,
+      user.password
+    );
     if (!validPassword) {
       res.status(400).send("wrong username or password");
       return;

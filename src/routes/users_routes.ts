@@ -2,7 +2,6 @@ import express from "express";
 const router = express.Router();
 import usersController from "../controllers/users_controller";
 import { authMiddleware } from "../controllers/auth_controller";
-import multer from "multer";
 
 /**
  * @swagger
@@ -179,13 +178,5 @@ router.put("/:id", authMiddleware, (req, res) => {
 router.delete("/:id", authMiddleware, (req, res) => {
   usersController.deleteUserById(req, res);
 });
-
-const upload = multer({ dest: 'uploads/' });
-
-router.put("/:id/profile", 
-  authMiddleware, 
-  upload.single('profilePicture'), 
-  usersController.updateProfile
-);
 
 export default router;

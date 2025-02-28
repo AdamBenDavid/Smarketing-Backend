@@ -1,6 +1,6 @@
 //adam ben david 208298257
 //aviv menahem 212292197
-import dotenv from "dotenv"
+import dotenv from "dotenv";
 dotenv.config();
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
@@ -9,30 +9,25 @@ import postsRoutes from "./routes/posts_routes";
 import commentsRoutes from "./routes/comments_routes";
 import usersRoutes from "./routes/users_routes";
 import authRoutes from "./routes/auth_routes";
-import chatRoutes from "./routes/chat_routes";
 import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUI from "swagger-ui-express";
 import cors from "cors";
-import http from 'http';
-import { initializeSocket } from './socket/socket';
 
 const app = express();
-const server = http.createServer(app);
-
-// Initialize Socket.IO
-initializeSocket(server);
-
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173', // Your frontend URL
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/posts", postsRoutes);
 app.use("/comments", commentsRoutes);
 app.use("/users", usersRoutes);
 app.use("/auth", authRoutes);
-app.use("/chat", chatRoutes);
 
 const options = {
   definition: {
@@ -42,7 +37,7 @@ const options = {
       version: "1.0.0",
       description: "REST server including authentication using JWT",
     },
-    servers: [{ url: "http://localhost:3000", },],
+    servers: [{ url: "http://localhost:3000" }],
   },
   apis: ["./src/routes/*.ts"],
 };
@@ -70,4 +65,4 @@ const initApp = () => {
   });
 };
 
-export { initApp, server };
+export default initApp;

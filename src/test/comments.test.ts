@@ -1,10 +1,10 @@
 import request from "supertest";
-import { initApp } from "../server";
+import initApp from "../server";
 import mongoose from "mongoose";
-import commentsModel from "../models/comments_model";
+import commentsModel from "../modules/comments_modules";
 import { Express } from "express";
 import testComments from "./test_comments.json";
-import userModel, { User } from "../models/user_model";
+import userModel, { User } from "../modules/user_modules";
 
 var app: Express;
 

@@ -18,7 +18,7 @@ const commentSchema = new mongoose.Schema<Comment>({
     required: true,
   },
   postId: {
-    type: String, 
+    type: String,
     required: true,
   },
 });
