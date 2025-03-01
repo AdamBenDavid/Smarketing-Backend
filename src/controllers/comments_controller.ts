@@ -1,4 +1,4 @@
-import commentsModel,{ Comment }  from "../models/comments_model";
+import commentsModel,{ Comment }  from "../modules/comments_modules";
 import { Request, Response } from "express";
 
 const addComment = async (req:Request, res:Response) => {

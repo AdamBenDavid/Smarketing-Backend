@@ -1,10 +1,10 @@
 import request from "supertest";
-import { initApp } from "../server";
+import initApp from "../server";
 import mongoose from "mongoose";
-import postModel from "../models/user_model";
+import postModel from "../modules/user_modules";
 import { Express } from "express";
 import testUsers from "./test_users.json";
-import userModel, { User } from "../models/user_model";
+import userModel, { User } from "../modules/user_modules";
 
 var app: Express;
 
@@ -12,7 +12,7 @@ type newUser = User & { token?: string };
 
 const testUser: newUser = {
   email: "test@user.com",
-  favPat: "dog",
+  fullName: "dog",
   password: "testpassword",
 };
 
@@ -46,7 +46,7 @@ describe("User Tests", () => {
     console.log("response email: " + response.body.email);
     expect(response.statusCode).toBe(200);
     expect(response.body.email).toBe(testUsers[0].email);
-    expect(response.body.favPat).toBe(testUsers[0].favPat);
+    expect(response.body.fullName).toBe(testUsers[0].fullName);
     expect(response.body.password).toBe(testUsers[0].password);
     userId = response.body._id;
     console.log("userId: " + userId);
@@ -66,7 +66,7 @@ describe("User Tests", () => {
     expect(response.statusCode).toBe(200);
     expect(response.body._id).toBe(userId);
     expect(response.body.email).toBe(testUsers[0].email);
-    expect(response.body.favPat).toBe(testUsers[0].favPat);
+    expect(response.body.fullName).toBe(testUsers[0].fullName);
     expect(response.body.password).toBe(testUsers[0].password);
   });
 
@@ -80,14 +80,14 @@ describe("User Tests", () => {
     expect(response.body.password).toBe("Updated Password");
   });
 
-  // update fav' pat by id
-  test("Test Update Fav' Pat", async () => {
+  // update fullName by id
+  test("Test Update fullName", async () => {
     const response = await request(app)
       .put(`/users/${userId}`)
       .set({ authorization: "JWT " + testUser.token })
-      .send({ favPat: "Updated Fav' Pat" });
+      .send({ fullName: "Updated fullName" });
     expect(response.statusCode).toBe(200);
-    expect(response.body.favPat).toBe("Updated Fav' Pat");
+    expect(response.body.fullName).toBe("Updated fullName");
   });
 
   // delete user by id
@@ -97,7 +97,7 @@ describe("User Tests", () => {
       .set({ authorization: "JWT " + testUser.token });
     expect(response.statusCode).toBe(200);
     expect(response.body.email).toBe(testUsers[0].email);
-    expect(response.body.favPat).toBe("Updated Fav' Pat");
+    expect(response.body.fullName).toBe("Updated fullName");
     expect(response.body._id).toBe(userId);
     expect(response.body.password).toBe("Updated Password");
   });

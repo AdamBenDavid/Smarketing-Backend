@@ -2,7 +2,6 @@ import express from "express";
 const router = express.Router();
 import usersController from "../controllers/users_controller";
 import { authMiddleware } from "../controllers/auth_controller";
-import multer from "multer";
 
 /**
  * @swagger
@@ -138,9 +137,9 @@ router.put("/:id", authMiddleware, (req, res) => {
  *           schema:
  *             type: object
  *             properties:
- *               favPat:
+ *               fullName:
  *                 type: string
- *                 example: Tiger
+ *                 example: adam smith
  *     responses:
  *       200:
  *         description: Favorite pattern updated successfully
@@ -150,7 +149,7 @@ router.put("/:id", authMiddleware, (req, res) => {
  *         description: User not found
  */
 router.put("/:id", authMiddleware, (req, res) => {
-  usersController.updateFavPatById(req, res);
+  usersController.updateFullNameById(req, res);
 });
 
 /**
@@ -179,13 +178,5 @@ router.put("/:id", authMiddleware, (req, res) => {
 router.delete("/:id", authMiddleware, (req, res) => {
   usersController.deleteUserById(req, res);
 });
-
-const upload = multer({ dest: 'uploads/' });
-
-router.put("/:id/profile", 
-  authMiddleware, 
-  upload.single('profilePicture'), 
-  usersController.updateProfile
-);
 
 export default router;

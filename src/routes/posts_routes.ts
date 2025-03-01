@@ -84,7 +84,9 @@ router.get("/", postsController.getAllPosts);
  *       404:
  *         description: Posts not found
  */
-router.get("/filter", postsController.getPostBySenderId);
+router.get("/filter", (req, res) => {
+  postsController.getPostBySenderId(req, res);
+});
 
 /**
  * @swagger
@@ -108,7 +110,7 @@ router.get("/filter", postsController.getPostBySenderId);
  *             schema:
  *               $ref: '#/components/schemas/Post'
  */
-router.post("/", /* authMiddleware, */ postsController.addPost);
+router.post("/", authMiddleware, postsController.addPost);
 
 /**
  * @swagger
@@ -178,6 +180,8 @@ router.delete("/", authMiddleware, postsController.deletePosts);
  *       404:
  *         description: Post not found
  */
-router.put("/:id", authMiddleware, postsController.updatePostById);
+router.put("/:id", authMiddleware, (req, res) => {
+  postsController.updatePostById(req, res);
+});
 
 export default router;
