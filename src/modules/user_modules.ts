@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 export interface User {
   email: string;
-  favPat: string;
+  fullName: string;
   password: string;
   _id?: string;
   refreshToken?: string[];
@@ -18,10 +18,10 @@ const userSchema = new mongoose.Schema<User>({
     type: String,
     required: true,
   },
-  favPat:{
-      type: String,
-      required: false,
-    },
+  fullName: {
+    type: String,
+    required: false,
+  },
   refreshToken: {
     type: [String],
     default: [],

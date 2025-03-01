@@ -137,9 +137,9 @@ router.put("/:id", authMiddleware, (req, res) => {
  *           schema:
  *             type: object
  *             properties:
- *               favPat:
+ *               fullName:
  *                 type: string
- *                 example: Tiger
+ *                 example: adam smith
  *     responses:
  *       200:
  *         description: Favorite pattern updated successfully
@@ -149,7 +149,7 @@ router.put("/:id", authMiddleware, (req, res) => {
  *         description: User not found
  */
 router.put("/:id", authMiddleware, (req, res) => {
-  usersController.updateFavPatById(req, res);
+  usersController.updateFullNameById(req, res);
 });
 
 /**

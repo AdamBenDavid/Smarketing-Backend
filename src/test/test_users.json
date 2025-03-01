@@ -2,11 +2,11 @@
     {
         "email": "aviv@gmail.com",
         "password": "Aa123456",
-        "favPat": "Dog"
+        "fullName": "Dog"
     },
     {
         "email": "adam@gmail.com",
         "password": "Bb123456",
-        "favPat": "Dolphin"
+        "fullName": "Dolphin"
     }
 ]
