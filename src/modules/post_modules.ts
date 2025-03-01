@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 export interface Post {
   postData: string;
   senderId: string;
+
+  image?: string;
 }
 
 const postSchema = new mongoose.Schema<Post>({
@@ -13,6 +15,10 @@ const postSchema = new mongoose.Schema<Post>({
   senderId: {
     type: String,
     required: true,
+  },
+  image: {
+    type: String,
+    required: false,
   },
 });
 

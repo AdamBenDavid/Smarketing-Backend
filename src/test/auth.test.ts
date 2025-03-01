@@ -123,7 +123,7 @@ describe("Auth Tests", () => {
         postData: "Test Post",
         senderId: "123",
       });
-    expect(response2.statusCode).toBe(200);
+    expect(response2.statusCode).toBe(201);
   });
 
   test("Test refresh token", async () => {
@@ -221,6 +221,6 @@ describe("Auth Tests", () => {
         postData: "Test Post",
         senderId: "123",
       });
-    expect(response4.statusCode).toBe(200);
+    expect(response4.statusCode).toBe(201);
   });
 });

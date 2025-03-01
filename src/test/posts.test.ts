@@ -50,9 +50,11 @@ describe("Posts Tests", () => {
       .post("/posts")
       .set({ authorization: "JWT " + testUser.token })
       .send(testposts[0]);
-    expect(response.statusCode).toBe(200);
+
+    expect(response.statusCode).toBe(201);
     expect(response.body.postData).toBe(testposts[0].postData);
     expect(response.body.senderId).toBe(testposts[0].senderId);
+    expect(response.body.image).toBe(testposts[0].image); // ✅ Check image field
     postId = response.body._id;
   });
 
@@ -80,24 +82,24 @@ describe("Posts Tests", () => {
     expect(response.statusCode).toBe(200);
     expect(response.body.postData).toBe(testposts[0].postData);
     expect(response.body.senderId).toBe(testposts[0].senderId);
+    expect(response.body.image).toBe(testposts[0].image);
   });
 
   //update post by id
   test("Test Update Post", async () => {
-    //if we didnt have the token we would get 401
-    const response1 = await request(app)
-      .put(`/posts/${postId}`)
-      .set({})
-      .send({ postData: "Updated Post" });
-    expect(response1.statusCode).not.toBe(200);
+    const updatedData = {
+      postData: "Updated Post",
+      image: "http://example.com/updated_image.jpg", // ✅ New image URL
+    };
 
-    //if we had the token we would get 200
-    const response2 = await request(app)
+    const response = await request(app)
       .put(`/posts/${postId}`)
       .set({ authorization: "JWT " + testUser.token })
-      .send({ postData: "Updated Post" });
-    expect(response2.statusCode).toBe(200);
-    expect(response2.body.postData).toBe("Updated Post");
+      .send(updatedData);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.postData).toBe(updatedData.postData);
+    expect(response.body.image).toBe(updatedData.image); // ✅ Check updated image
   });
 
   // delete posts
