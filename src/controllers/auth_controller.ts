@@ -4,6 +4,53 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Document } from "mongoose";
 import { log } from "console";
+import { OAuth2Client } from "google-auth-library";
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+const googleSignin = async (req: Request, res: Response) => {
+  const credential = req.body.credential;
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const email = payload?.email;
+    if (email) {
+      let user = await userModel.findOne({ email: email });
+      if (!user) {
+        user = await userModel.create({
+          email: email,
+          password: "",
+          fullName: payload?.name,
+          imgUrl: payload?.picture,
+        });
+      }
+      const tokens = await generateToken(user);
+      res
+        .status(200)
+        .send({ email: user.email, fullName: user.fullName, ...tokens });
+      return;
+    }
+  } catch (err: any) {
+    res.status(400).send(err.message);
+  }
+};
+
+const generateToken = async (user: Document & User) => {
+  const accessToken = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET!, {
+    expiresIn: process.env.TOKEN_EXPIRES,
+  });
+  const refreshToken = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET!);
+  if (!user.refreshToken) {
+    user.refreshToken = [refreshToken];
+  } else {
+    user.refreshToken.push(refreshToken);
+  }
+  await user.save();
+  return { accessToken, refreshToken };
+};
 
 const register = async (req: Request, res: Response) => {
   try {
@@ -230,4 +277,4 @@ export const authMiddleware = (
   });
 };
 
-export default { register, login, refresh, logout };
+export default { register, login, refresh, logout, googleSignin };
