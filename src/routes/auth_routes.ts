@@ -1,6 +1,7 @@
 import express from "express";
-const router = express.Router();
 import authController from "../controllers/auth_controller";
+
+const router = express.Router();
 
 /**
  * @swagger
@@ -66,6 +67,7 @@ import authController from "../controllers/auth_controller";
  */
 
 router.post("/register", authController.register);
+router.post("/google", authController.googleSignin);
 
 /**
  * @swagger

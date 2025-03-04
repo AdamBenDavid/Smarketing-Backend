@@ -1,10 +1,13 @@
 [
     {
-        "postData": "new post 1",
-        "senderId": "Aviv"
+      "postData": "new post 1",
+      "senderId": "Aviv",
+      "image": "http://example.com/image1.jpg"
     },
     {
-        "postData": "new post 2",
-        "senderId": "Adam"
+      "postData": "new post 2",
+      "senderId": "Adam",
+      "image": ""
     }
-]
+  ]
+  

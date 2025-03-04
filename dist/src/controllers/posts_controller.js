@@ -16,12 +16,17 @@ const post_modules_1 = __importDefault(require("../modules/post_modules"));
 const addPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log("add post");
     try {
-        const post = new post_modules_1.default(req.body);
+        const { postData, senderId, image } = req.body;
+        const post = new post_modules_1.default({
+            postData,
+            senderId,
+            image: image || "",
+        });
         yield post.save();
-        res.send(post);
+        res.status(201).json(post);
     }
     catch (error) {
-        res.status(400).send;
+        res.status(400).json({ error: error.message });
     }
 });
 const getAllPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -61,18 +66,17 @@ const deletePosts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 });
 const updatePostById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const postId = req.params.id;
-    const updatedData = req.body;
+    const { postData, image } = req.body;
     try {
-        const updatedPost = yield post_modules_1.default.findByIdAndUpdate(postId, updatedData, {
-            new: true,
-        });
+        const updatedPost = yield post_modules_1.default.findByIdAndUpdate(postId, { postData, image }, // ✅ Allow updating the image
+        { new: true });
         if (!updatedPost) {
             return res.status(404).send("Post not found");
         }
-        res.status(200).send(updatedPost);
+        res.status(200).json(updatedPost);
     }
     catch (error) {
-        res.status(400).send(error);
+        res.status(400).json({ error: error.message });
     }
 });
 // Controller to get posts by sender
@@ -85,7 +89,9 @@ const getPostBySenderId = (req, res) => __awaiter(void 0, void 0, void 0, functi
     try {
         const posts = yield post_modules_1.default.find({ senderId }); // חיפוש לפי senderId
         if (posts.length === 0) {
-            return res.status(404).json({ message: "No posts found for the given sender" });
+            return res
+                .status(404)
+                .json({ message: "No posts found for the given sender" });
         }
         res.status(200).json(posts);
     }
@@ -94,5 +100,12 @@ const getPostBySenderId = (req, res) => __awaiter(void 0, void 0, void 0, functi
         res.status(500).json({ error: "Server error" });
     }
 });
-exports.default = { addPost, getAllPosts, getPostById, deletePosts, updatePostById, getPostBySenderId };
+exports.default = {
+    addPost,
+    getAllPosts,
+    getPostById,
+    deletePosts,
+    updatePostById,
+    getPostBySenderId,
+};
 //# sourceMappingURL=posts_controller.js.map
