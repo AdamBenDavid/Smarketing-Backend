@@ -48,8 +48,14 @@ app.use("/posts", postsRoutes);
 app.use("/comments", commentsRoutes);
 app.use("/users", usersRoutes);
 app.use("/auth", authRoutes);
-app.use("/uploads", express.static("uploads"));
-// example for a photo location: http://localhost:3000/uploads/image-123456.jpg
+app.use(
+  "/uploads/profile_pictures",
+  express.static("uploads/profile_pictures")
+);
+app.use("/uploads/post_images", express.static("uploads/post_images"));
+// example for a photo location:
+// profile: http://localhost:3000/uploads/profile_pictures/your-profile.jpg
+// posts: http://localhost:3000/uploads/post_images/your-post.jpg
 
 const options = {
   definition: {

@@ -1,5 +1,6 @@
 import express from "express";
-import authController from "../controllers/auth_controller";
+import authController, { authMiddleware } from "../controllers/auth_controller";
+import upload from "../multer.config";
 
 const router = express.Router();
 
@@ -174,5 +175,13 @@ router.post("/refresh", authController.refresh);
  *         description: Server error
  */
 router.post("/logout", authController.logout);
+
+router.put(
+  "/profile/:id",
+  upload.single("profilePicture"),
+  authController.updateProfile
+);
+
+router.get("/profile/:id", authMiddleware, authController.getUserById);
 
 export default router;

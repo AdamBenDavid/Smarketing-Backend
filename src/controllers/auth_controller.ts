@@ -6,6 +6,8 @@ import { Document } from "mongoose";
 import { log } from "console";
 import { OAuth2Client } from "google-auth-library";
 import crypto from "crypto";
+import fs from "fs";
+import path from "path";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -305,4 +307,82 @@ export const authMiddleware = (
   });
 };
 
-export default { register, login, refresh, logout, googleSignin };
+const updateProfile = async (req: Request, res: Response): Promise<void> => {
+  try {
+    log("Updating profile...");
+    const userId = req.params.id;
+    const { fullName } = req.body;
+    const file = req.file;
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      res.status(404).send({ message: "User not found" });
+      return;
+    }
+
+    if (file) {
+      const uploadsDir = path.join(
+        __dirname,
+        "../../uploads/profile_pictures/"
+      );
+      if (
+        user.profilePicture &&
+        user.profilePicture.startsWith("uploads/profile_pictures/")
+      ) {
+        const oldImagePath = path.join(
+          __dirname,
+          "../../",
+          user.profilePicture
+        );
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+
+      user.profilePicture = `uploads/profile_pictures/${file.filename}`;
+    }
+
+    if (fullName) user.fullName = fullName;
+
+    await user.save();
+
+    res.status(200).send({
+      message: "Profile updated successfully",
+      user: {
+        _id: user._id,
+        fullName: user.fullName,
+        profilePicture: user.profilePicture,
+      },
+    });
+  } catch (err) {
+    console.error(" Profile Update Error:", err);
+    res.status(500).send({ message: "Server error" });
+  }
+};
+
+const getUserById = async (req: Request, res: Response): Promise<void> => {
+  const userId = req.params.id;
+
+  try {
+    const user = await userModel.findById(userId).select("-password"); // ✅ Exclude password field
+    if (!user) {
+      res.status(404).send({ message: "User not found" });
+      return;
+    }
+
+    res.status(200).send(user);
+  } catch (error) {
+    console.error("❌ Error fetching user:", error);
+    res.status(500).send({ message: "Server error" });
+  }
+};
+
+export default {
+  register,
+  login,
+  refresh,
+  logout,
+  googleSignin,
+  updateProfile,
+  getUserById,
+};
