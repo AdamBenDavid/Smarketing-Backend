@@ -5,6 +5,7 @@ export interface User {
   fullName: string;
   password: string;
   _id?: string;
+  profilePicture?: string;
   refreshToken?: string[];
 }
 

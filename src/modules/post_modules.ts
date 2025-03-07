@@ -2,9 +2,10 @@ import mongoose from "mongoose";
 
 export interface Post {
   postData: string;
-  senderId: string;
+  senderId: string; // This is the user id of the sender
 
   image?: string;
+  likes?: number;
 }
 
 const postSchema = new mongoose.Schema<Post>({
@@ -18,6 +19,10 @@ const postSchema = new mongoose.Schema<Post>({
   },
   image: {
     type: String,
+    required: false,
+  },
+  likes: {
+    type: Number,
     required: false,
   },
 });
