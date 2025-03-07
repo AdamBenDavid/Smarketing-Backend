@@ -12,6 +12,7 @@ import authRoutes from "./routes/auth_routes";
 import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUI from "swagger-ui-express";
 import cors from "cors";
+import path from "path";
 
 const app = express();
 app.use(
@@ -28,6 +29,8 @@ app.use("/posts", postsRoutes);
 app.use("/comments", commentsRoutes);
 app.use("/users", usersRoutes);
 app.use("/auth", authRoutes);
+app.use("/uploads", express.static("uploads"));
+// example for a photo location: http://localhost:3000/uploads/image-123456.jpg
 
 const options = {
   definition: {

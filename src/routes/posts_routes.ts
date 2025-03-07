@@ -2,6 +2,7 @@ import express from "express";
 const router = express.Router();
 import postsController from "../controllers/posts_controller";
 import { authMiddleware } from "../controllers/auth_controller";
+import upload from "../multer.config";
 
 /**
  * @swagger
@@ -84,8 +85,12 @@ router.get("/", postsController.getAllPosts);
  *       404:
  *         description: Posts not found
  */
-router.get("/filter", (req, res) => {
-  postsController.getPostBySenderId(req, res);
+router.get("/user/:userId", async (req, res, next) => {
+  try {
+    await postsController.getPostBySenderId(req, res);
+  } catch (error) {
+    next(error);
+  }
 });
 
 /**
@@ -110,11 +115,12 @@ router.get("/filter", (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Post'
  */
-router.post("/", authMiddleware, postsController.addPost);
+router.post("/", upload.single("image"), postsController.addPost);
 
 /**
  * @swagger
  * /posts/{id}:
+ *
  *   get:
  *     summary: Get a post by ID
  *     tags: [Posts]
@@ -182,6 +188,10 @@ router.delete("/", authMiddleware, postsController.deletePosts);
  */
 router.put("/:id", authMiddleware, (req, res) => {
   postsController.updatePostById(req, res);
+});
+
+router.put("/like/:id", authMiddleware, (req, res) => {
+  postsController.addLike(req, res);
 });
 
 export default router;

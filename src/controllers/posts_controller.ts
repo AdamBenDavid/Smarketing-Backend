@@ -3,12 +3,15 @@ import { Request, Response } from "express";
 
 const addPost = async (req: Request, res: Response) => {
   console.log("add post");
+
   try {
-    const { postData, senderId, image } = req.body;
+    const { postData, senderId } = req.body;
+    const image = req.file ? `/uploads/${req.file.filename}` : null;
+
     const post = new postModel({
       postData,
       senderId,
-      image: image || "",
+      image,
     });
 
     await post.save();
@@ -59,7 +62,7 @@ const updatePostById = async (req: Request, res: Response) => {
   try {
     const updatedPost = await postModel.findByIdAndUpdate(
       postId,
-      { postData, image }, // ✅ Allow updating the image
+      { postData, image },
       { new: true }
     );
 
@@ -75,24 +78,42 @@ const updatePostById = async (req: Request, res: Response) => {
 // Controller to get posts by sender
 //here
 const getPostBySenderId = async (req: Request, res: Response) => {
-  const senderId = req.query.senderId; // senderId מגיע מה-Query
-  if (!senderId) {
-    return res.status(400).json({ error: "Sender ID is required" });
+  const { userId } = req.params; // Extract userId from the URL
+
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is required" });
   }
 
   try {
-    const posts = await postModel.find({ senderId }); // חיפוש לפי senderId
+    const posts = await postModel.find({ senderId: userId }); // Find posts by senderId
 
     if (posts.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No posts found for the given sender" });
+      return res.status(404).json({ message: "No posts found for this user" });
     }
 
     res.status(200).json(posts);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
+    console.error(" Error fetching user posts:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+const addLike = async (req: Request, res: Response) => {
+  const postId = req.params.id;
+  try {
+    const updatedPost = await postModel.findByIdAndUpdate(
+      postId,
+      { $inc: { likes: 1 } },
+      { new: true }
+    );
+
+    if (!updatedPost) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    res.status(200).json(updatedPost);
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error", error });
   }
 };
 
@@ -103,4 +124,5 @@ export default {
   deletePosts,
   updatePostById,
   getPostBySenderId,
+  addLike,
 };
