@@ -5,36 +5,64 @@ import jwt from "jsonwebtoken";
 import { Document } from "mongoose";
 import { log } from "console";
 import { OAuth2Client } from "google-auth-library";
+import crypto from "crypto";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-const googleSignin = async (req: Request, res: Response) => {
+const googleSignin = async (req: Request, res: Response): Promise<void> => {
   const credential = req.body.credential;
+  if (!credential) {
+    console.error(" Missing credential");
+    res.status(400).send("Missing Google credential");
+    return;
+  }
+
   try {
+    console.log("Verifying Google ID token...");
     const ticket = await client.verifyIdToken({
       idToken: credential,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
+
     const payload = ticket.getPayload();
-    const email = payload?.email;
-    if (email) {
-      let user = await userModel.findOne({ email: email });
-      if (!user) {
-        user = await userModel.create({
-          email: email,
-          password: "",
-          fullName: payload?.name,
-          imgUrl: payload?.picture,
-        });
-      }
-      const tokens = await generateToken(user);
-      res
-        .status(200)
-        .send({ email: user.email, fullName: user.fullName, ...tokens });
+    console.log("🔹 Google Payload:", payload);
+
+    if (!payload || !payload.email) {
+      console.error("Invalid Google token or missing email in payload");
+      res.status(400).send("Invalid Google token");
       return;
     }
+
+    const email = payload.email;
+    let user = await userModel.findOne({ email });
+
+    if (!user) {
+      const randomPassword = crypto.randomBytes(16).toString("hex");
+
+      console.log("🔹 Creating new user...");
+      user = await userModel.create({
+        email: email,
+        password: randomPassword,
+        fullName: payload.name,
+        profilePicture: payload.picture,
+      });
+    }
+
+    console.log("🔹 Generating tokens for user...");
+    const tokens = await generateToken(user);
+
+    res.status(200).send({
+      user: {
+        _id: user._id,
+        email: user.email,
+        fullName: user.fullName,
+        profilePicture: user.profilePicture,
+      },
+      accessToken: tokens.accessToken,
+    });
   } catch (err: any) {
-    res.status(400).send(err.message);
+    console.error("Google Sign-in Error:", err);
+    res.status(400).send({ message: err.message });
   }
 };
 

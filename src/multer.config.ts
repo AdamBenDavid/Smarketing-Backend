@@ -1,17 +1,15 @@
 import multer from "multer";
 import path from "path";
 
-// Configure storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Make sure "uploads" folder exists
+    cb(null, "uploads/");
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Generate unique filename
+    cb(null, Date.now() + path.extname(file.originalname));
   },
 });
 
-// File filter (only accept images)
 const fileFilter = (req: any, file: Express.Multer.File, cb: any) => {
   if (!file.mimetype.startsWith("image/")) {
     return cb(new Error("Only image files are allowed"), false);
