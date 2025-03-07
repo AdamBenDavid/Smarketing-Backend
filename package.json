@@ -37,7 +37,7 @@
   "scripts": {
     "nodemon": "nodemon server.js",
     "test": "cp .env_test .env && tsc && jest --detectOpenHandles --forceExit --verbose",
-    "dev": "cp .env_dev .env && nodemon ./src/app.ts",
+    "dev": "copy .env_dev .env && nodemon ./src/app.ts",
     "lint": "eslint . --ext .ts",
     "test:coverage": "jest --coverage"
   }

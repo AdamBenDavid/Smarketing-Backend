@@ -9,6 +9,7 @@ import postsRoutes from "./routes/posts_routes";
 import commentsRoutes from "./routes/comments_routes";
 import usersRoutes from "./routes/users_routes";
 import authRoutes from "./routes/auth_routes";
+import chatRoutes from "./routes/chat_routes";
 import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUI from "swagger-ui-express";
 import cors from "cors";
@@ -29,6 +30,7 @@ app.use("/posts", postsRoutes);
 app.use("/comments", commentsRoutes);
 app.use("/users", usersRoutes);
 app.use("/auth", authRoutes);
+app.use("/chat", chatRoutes);
 app.use("/uploads", express.static("uploads"));
 // example for a photo location: http://localhost:3000/uploads/image-123456.jpg
 
