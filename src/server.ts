@@ -29,19 +29,22 @@ app.use(
 );
 
 app.use(
-  helmet({
-    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
-    crossOriginEmbedderPolicy: false,
-  })
+  "/uploads/profile_pictures",
+  express.static(path.join(__dirname, "../uploads/profile_pictures"))
+);
+app.use(
+  "/uploads/post_images",
+  express.static(path.join(__dirname, "../uploads/post_images"))
 );
 
+// ✅ FIX CORS ISSUES
 app.use((req, res, next) => {
-  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
-  res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
   res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
 });
-
 //touching here can couse a bug- be careful and check the photos at the profile + post images
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
