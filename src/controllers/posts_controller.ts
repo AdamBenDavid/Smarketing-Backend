@@ -11,19 +11,15 @@ const addPost = async (req: Request, res: Response) => {
       res.status(400).json({ error: "Sender ID is required" });
     }
 
-    // ✅ Fix double slashes by ensuring a consistent format
     const image = req.file ? `uploads/post_images/${req.file.filename}` : null;
 
-    // ✅ Create the new post
     const post = new postModel({ postData, senderId, image });
     await post.save();
 
-    // ✅ Fetch user details
     const user = await userModel
       .findById(senderId)
       .select("fullName profilePicture");
 
-    // ✅ Return correct image URL format
     res.status(201).json({
       _id: post._id,
       postData: post.postData,
