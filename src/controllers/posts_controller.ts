@@ -1,21 +1,40 @@
 import postModel, { Post } from "../modules/post_modules";
+import userModel from "../modules/user_modules";
+
+("../modules/user_modules");
 import { Request, Response } from "express";
 
 const addPost = async (req: Request, res: Response) => {
-  console.log("add post");
-
   try {
     const { postData, senderId } = req.body;
-    const image = req.file ? `/uploads/${req.file.filename}` : null;
+    if (!senderId) {
+      res.status(400).json({ error: "Sender ID is required" });
+    }
 
-    const post = new postModel({
-      postData,
-      senderId,
-      image,
-    });
+    // ✅ Fix double slashes by ensuring a consistent format
+    const image = req.file ? `uploads/post_images/${req.file.filename}` : null;
 
+    // ✅ Create the new post
+    const post = new postModel({ postData, senderId, image });
     await post.save();
-    res.status(201).json(post);
+
+    // ✅ Fetch user details
+    const user = await userModel
+      .findById(senderId)
+      .select("fullName profilePicture");
+
+    // ✅ Return correct image URL format
+    res.status(201).json({
+      _id: post._id,
+      postData: post.postData,
+      user: {
+        _id: user?._id,
+        fullName: user?.fullName || "משתמש אנונימי",
+        profilePicture: user?.profilePicture || "https://placehold.co/150x150",
+      },
+      image: image ? `http://localhost:3000/${image}` : null, // ✅ Fixed
+      comments: [],
+    });
   } catch (error) {
     res.status(400).json({ error: (error as Error).message });
   }
