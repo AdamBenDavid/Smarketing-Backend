@@ -28,7 +28,7 @@ const addPost = async (req: Request, res: Response) => {
         fullName: user?.fullName || "משתמש אנונימי",
         profilePicture: user?.profilePicture || "https://placehold.co/150x150",
       },
-      image: image ? `http://localhost:3000/${image}` : null, // ✅ Fixed
+      image: image ? `http://localhost:3000/${image}` : null,
       comments: [],
     });
   } catch (error) {
@@ -39,11 +39,15 @@ const addPost = async (req: Request, res: Response) => {
 const getAllPosts = async (req: Request, res: Response) => {
   try {
     console.log("get all posts");
-    const posts = await postModel.find();
-    console.log("posts " + posts);
-    res.send(posts);
+
+    const posts = await postModel
+      .find()
+      .populate("senderId", "fullName profilePicture");
+
+    console.log("Fetched posts:", posts);
+    res.status(200).json(posts);
   } catch (error) {
-    res.status(400).send(error);
+    res.status(400).json({ error: "Failed to fetch posts" });
   }
 };
 
@@ -100,7 +104,9 @@ const getPostBySenderId = async (req: Request, res: Response) => {
   }
 
   try {
-    const posts = await postModel.find({ senderId: userId }); // Find posts by senderId
+    const posts = await postModel
+      .find({ senderId: userId })
+      .populate("senderId", "fullName profilePicture");
 
     if (posts.length === 0) {
       return res.status(404).json({ message: "No posts found for this user" });
