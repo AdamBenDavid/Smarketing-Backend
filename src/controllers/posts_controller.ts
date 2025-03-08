@@ -105,7 +105,7 @@ const getPostBySenderId = async (req: Request, res: Response) => {
     if (posts.length === 0) {
       return res.status(404).json({ message: "No posts found for this user" });
     }
-
+    //test
     res.status(200).json(posts);
   } catch (err) {
     console.error(" Error fetching user posts:", err);
