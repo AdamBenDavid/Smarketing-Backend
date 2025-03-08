@@ -3,7 +3,7 @@ import userModel, { User } from "../modules/user_modules";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Document } from "mongoose";
-import { log } from "console";
+import { log, profile } from "console";
 import { OAuth2Client } from "google-auth-library";
 import crypto from "crypto";
 import fs from "fs";
@@ -48,6 +48,11 @@ const googleSignin = async (req: Request, res: Response): Promise<void> => {
         fullName: payload.name,
         profilePicture: payload.picture,
       });
+    } else {
+      if (!user.profilePicture) {
+        user.profilePicture = payload.picture;
+        await user.save();
+      }
     }
 
     console.log("🔹 Generating tokens for user...");
@@ -58,7 +63,9 @@ const googleSignin = async (req: Request, res: Response): Promise<void> => {
         _id: user._id,
         email: user.email,
         fullName: user.fullName,
-        profilePicture: user.profilePicture,
+        profilePicture: user.profilePicture
+          ? user.profilePicture
+          : "https://placehold.co/150x150",
       },
       accessToken: tokens.accessToken,
     });
@@ -166,6 +173,12 @@ const login = async (req: Request, res: Response) => {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
       _id: user._id,
+      fullName: user.fullName,
+      profilePicture: user.profilePicture
+        ? `http://localhost:3000/uploads/profile_pictures/${user.profilePicture
+            .split("/")
+            .pop()}`
+        : null,
     });
   } catch (err) {
     res.status(400).send(err);
@@ -351,11 +364,13 @@ const updateProfile = async (req: Request, res: Response): Promise<void> => {
       user: {
         _id: user._id,
         fullName: user.fullName,
-        profilePicture: user.profilePicture,
+        profilePicture: user.profilePicture
+          ? `http://localhost:3000/${user.profilePicture}`
+          : null,
       },
     });
   } catch (err) {
-    console.error(" Profile Update Error:", err);
+    console.error("Profile Update Error:", err);
     res.status(500).send({ message: "Server error" });
   }
 };
@@ -364,7 +379,7 @@ const getUserById = async (req: Request, res: Response): Promise<void> => {
   const userId = req.params.id;
 
   try {
-    const user = await userModel.findById(userId).select("-password"); // ✅ Exclude password field
+    const user = await userModel.findById(userId).select("-password");
     if (!user) {
       res.status(404).send({ message: "User not found" });
       return;
@@ -372,7 +387,7 @@ const getUserById = async (req: Request, res: Response): Promise<void> => {
 
     res.status(200).send(user);
   } catch (error) {
-    console.error("❌ Error fetching user:", error);
+    console.error(" Error fetching user:", error);
     res.status(500).send({ message: "Server error" });
   }
 };

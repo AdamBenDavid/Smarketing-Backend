@@ -13,12 +13,11 @@ ensureUploadsDir("uploads/post_images");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadType = req.body.uploadType || "profile";
-    const uploadDir =
-      uploadType === "post"
-        ? "uploads/post_images/"
-        : "uploads/profile_pictures/";
-    cb(null, uploadDir);
+    if (req.originalUrl.includes("/posts")) {
+      cb(null, "uploads/post_images/");
+    } else {
+      cb(null, "uploads/profile_pictures/");
+    }
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));

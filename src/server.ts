@@ -42,17 +42,23 @@ app.use((req, res, next) => {
   next();
 });
 
+//touching here can couse a bug- be careful and check the photos at the profile + post images
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/posts", postsRoutes);
 app.use("/comments", commentsRoutes);
 app.use("/users", usersRoutes);
 app.use("/auth", authRoutes);
+
 app.use(
   "/uploads/profile_pictures",
-  express.static("uploads/profile_pictures")
+  express.static(path.join(__dirname, "../uploads/profile_pictures"))
 );
-app.use("/uploads/post_images", express.static("uploads/post_images"));
+app.use(
+  "/uploads/post_images",
+  express.static(path.join(__dirname, "../uploads/post_images"))
+);
+
 // example for a photo location:
 // profile: http://localhost:3000/uploads/profile_pictures/your-profile.jpg
 // posts: http://localhost:3000/uploads/post_images/your-post.jpg
