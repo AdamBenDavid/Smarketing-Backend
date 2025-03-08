@@ -5,6 +5,7 @@ dotenv.config();
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import express, { Express } from "express";
+import { createServer } from 'http';
 import postsRoutes from "./routes/posts_routes";
 import commentsRoutes from "./routes/comments_routes";
 import usersRoutes from "./routes/users_routes";
@@ -14,8 +15,11 @@ import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUI from "swagger-ui-express";
 import cors from "cors";
 import path from "path";
+import { initializeSocket } from './socket';
 
 const app = express();
+const httpServer = createServer(app);
+
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -32,7 +36,7 @@ app.use("/users", usersRoutes);
 app.use("/auth", authRoutes);
 app.use("/chat", chatRoutes);
 app.use("/uploads", express.static("uploads"));
-// example for a photo location: http://localhost:3000/uploads/image-123456.jpg
+app.use("/test", express.static("."));
 
 const options = {
   definition: {
@@ -61,6 +65,8 @@ const initApp = () => {
       mongoose
         .connect(process.env.DB_CONNECT)
         .then(() => {
+          // Initialize Socket.IO
+          initializeSocket(httpServer);
           resolve(app);
         })
         .catch((error) => {
@@ -70,4 +76,5 @@ const initApp = () => {
   });
 };
 
+export { httpServer };  // Export the HTTP server for use in app.ts
 export default initApp;

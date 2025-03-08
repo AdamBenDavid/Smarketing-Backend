@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Socket.IO Test</title>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>Socket.IO Test</h1>
+    <div>
+        <input type="text" id="tokenInput" placeholder="Enter your JWT token" style="width: 500px;" />
+        <button onclick="connect()">Connect</button>
+        <button onclick="sendMessage()">Send Test Message</button>
+    </div>
+    <div id="status"></div>
+    <div id="messages"></div>
+
+    <script>
+        let socket;
+
+        function updateStatus(text) {
+            const now = new Date().toLocaleTimeString();
+            document.getElementById('status').innerHTML += `<p>[${now}] ${text}</p>`;
+        }
+
+        function connect() {
+            if (socket) {
+                socket.disconnect();
+            }
+
+            const token = document.getElementById('tokenInput').value;
+            if (!token) {
+                updateStatus('Please enter a token');
+                return;
+            }
+
+            updateStatus('Attempting to connect...');
+            
+            socket = io('http://localhost:3000', {
+                auth: { token },
+                transports: ['websocket', 'polling'],
+                withCredentials: true
+            });
+
+            socket.on('connect', () => {
+                updateStatus('Connected to server');
+                console.log('Socket ID:', socket.id);
+            });
+
+            socket.on('connect_error', (error) => {
+                updateStatus('Connection error: ' + error.message);
+                console.error('Connection error details:', error);
+            });
+
+            socket.on('disconnect', (reason) => {
+                updateStatus('Disconnected: ' + reason);
+            });
+
+            socket.on('new_message', (data) => {
+                updateStatus('Received message: ' + JSON.stringify(data));
+            });
+
+            socket.on('message_sent', (data) => {
+                updateStatus('Message sent confirmation: ' + JSON.stringify(data));
+            });
+
+            socket.io.on('error', (error) => {
+                updateStatus('Transport error: ' + error.message);
+                console.error('Transport error details:', error);
+            });
+        }
+
+        function sendMessage() {
+            if (!socket?.connected) {
+                updateStatus('Please connect first');
+                return;
+            }
+
+            updateStatus('Attempting to send message...');
+            socket.emit('private_message', {
+                recipientId: '67cb17e562fe98d73cb1d1df',
+                content: 'Test message from socket tester at ' + new Date().toLocaleString()
+            });
+        }
+    </script>
+</body>
+</html> 
