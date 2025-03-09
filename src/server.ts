@@ -14,6 +14,10 @@ import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUI from "swagger-ui-express";
 import cors from "cors";
 import path from "path";
+import helmet from "helmet";
+
+console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
+console.log("DB_CONNECT:", process.env.DB_CONNECT);
 
 const app = express();
 app.use(
@@ -24,20 +28,27 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
 //הגדלת הגודל שאפשר להעביר בבקשות (עשינו בשביל העברת התמונות לגימיני)
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/posts", postsRoutes);
 app.use("/comments", commentsRoutes);
 app.use("/users", usersRoutes);
 app.use("/auth", authRoutes);
-app.use("/uploads", express.static("uploads"));
-app.use("/gemini", geminiRoutes);
-// example for a photo location: http://localhost:3000/uploads/image-123456.jpg
+app.use(
+  "/uploads/profile_pictures",
+  express.static(path.join(__dirname, "../uploads/profile_pictures"))
+);
+app.use(
+  "/uploads/post_images",
+  express.static(path.join(__dirname, "../uploads/post_images"))
+);
+
+// example for a photo location:
+// profile: http://localhost:3000/uploads/profile_pictures/your-profile.jpg
+// posts: http://localhost:3000/uploads/post_images/your-post.jpg
 
 const options = {
   definition: {

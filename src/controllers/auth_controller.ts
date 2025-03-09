@@ -3,38 +3,75 @@ import userModel, { User } from "../modules/user_modules";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Document } from "mongoose";
-import { log } from "console";
+import { log, profile } from "console";
 import { OAuth2Client } from "google-auth-library";
+import crypto from "crypto";
+import fs from "fs";
+import path from "path";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-const googleSignin = async (req: Request, res: Response) => {
+const googleSignin = async (req: Request, res: Response): Promise<void> => {
   const credential = req.body.credential;
+  if (!credential) {
+    console.error(" Missing credential");
+    res.status(400).send("Missing Google credential");
+    return;
+  }
+
   try {
+    console.log("Verifying Google ID token...");
     const ticket = await client.verifyIdToken({
       idToken: credential,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
+
     const payload = ticket.getPayload();
-    const email = payload?.email;
-    if (email) {
-      let user = await userModel.findOne({ email: email });
-      if (!user) {
-        user = await userModel.create({
-          email: email,
-          password: "",
-          fullName: payload?.name,
-          imgUrl: payload?.picture,
-        });
-      }
-      const tokens = await generateToken(user);
-      res
-        .status(200)
-        .send({ email: user.email, fullName: user.fullName, ...tokens });
+    console.log("🔹 Google Payload:", payload);
+
+    if (!payload || !payload.email) {
+      console.error("Invalid Google token or missing email in payload");
+      res.status(400).send("Invalid Google token");
       return;
     }
+
+    const email = payload.email;
+    let user = await userModel.findOne({ email });
+
+    if (!user) {
+      const randomPassword = crypto.randomBytes(16).toString("hex");
+
+      console.log("🔹 Creating new user...");
+      user = await userModel.create({
+        email: email,
+        password: randomPassword,
+        fullName: payload.name,
+        profilePicture: payload.picture,
+      });
+    } else {
+      if (!user.profilePicture) {
+        user.profilePicture = payload.picture;
+        await user.save();
+      }
+    }
+
+    console.log("🔹 Generating tokens for user...");
+    const tokens = await generateToken(user);
+
+    res.status(200).send({
+      user: {
+        _id: user._id,
+        email: user.email,
+        fullName: user.fullName,
+        profilePicture: user.profilePicture
+          ? user.profilePicture
+          : "https://placehold.co/150x150",
+      },
+      accessToken: tokens.accessToken,
+    });
   } catch (err: any) {
-    res.status(400).send(err.message);
+    console.error("Google Sign-in Error:", err);
+    res.status(400).send({ message: err.message });
   }
 };
 
@@ -136,6 +173,12 @@ const login = async (req: Request, res: Response) => {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
       _id: user._id,
+      fullName: user.fullName,
+      profilePicture: user.profilePicture
+        ? `http://localhost:3000/uploads/profile_pictures/${user.profilePicture
+            .split("/")
+            .pop()}`
+        : null,
     });
   } catch (err) {
     res.status(400).send(err);
@@ -277,4 +320,84 @@ export const authMiddleware = (
   });
 };
 
-export default { register, login, refresh, logout, googleSignin };
+const updateProfile = async (req: Request, res: Response): Promise<void> => {
+  try {
+    log("Updating profile...");
+    const userId = req.params.id;
+    const { fullName } = req.body;
+    const file = req.file;
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      res.status(404).send({ message: "User not found" });
+      return;
+    }
+
+    if (file) {
+      const uploadsDir = path.join(
+        __dirname,
+        "../../uploads/profile_pictures/"
+      );
+      if (
+        user.profilePicture &&
+        user.profilePicture.startsWith("uploads/profile_pictures/")
+      ) {
+        const oldImagePath = path.join(
+          __dirname,
+          "../../",
+          user.profilePicture
+        );
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+
+      user.profilePicture = `uploads/profile_pictures/${file.filename}`;
+    }
+
+    if (fullName) user.fullName = fullName;
+
+    await user.save();
+
+    res.status(200).send({
+      message: "Profile updated successfully",
+      user: {
+        _id: user._id,
+        fullName: user.fullName,
+        profilePicture: user.profilePicture
+          ? `http://localhost:3000/${user.profilePicture}`
+          : null,
+      },
+    });
+  } catch (err) {
+    console.error("Profile Update Error:", err);
+    res.status(500).send({ message: "Server error" });
+  }
+};
+
+const getUserById = async (req: Request, res: Response): Promise<void> => {
+  const userId = req.params.id;
+
+  try {
+    const user = await userModel.findById(userId).select("-password");
+    if (!user) {
+      res.status(404).send({ message: "User not found" });
+      return;
+    }
+
+    res.status(200).send(user);
+  } catch (error) {
+    console.error(" Error fetching user:", error);
+    res.status(500).send({ message: "Server error" });
+  }
+};
+
+export default {
+  register,
+  login,
+  refresh,
+  logout,
+  googleSignin,
+  updateProfile,
+  getUserById,
+};

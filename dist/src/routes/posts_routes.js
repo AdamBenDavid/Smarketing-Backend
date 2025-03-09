@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -7,6 +16,7 @@ const express_1 = __importDefault(require("express"));
 const router = express_1.default.Router();
 const posts_controller_1 = __importDefault(require("../controllers/posts_controller"));
 const auth_controller_1 = require("../controllers/auth_controller");
+const multer_config_1 = __importDefault(require("../multer.config"));
 /**
  * @swagger
  * tags:
@@ -84,9 +94,14 @@ router.get("/", posts_controller_1.default.getAllPosts);
  *       404:
  *         description: Posts not found
  */
-router.get("/filter", (req, res) => {
-    posts_controller_1.default.getPostBySenderId(req, res);
-});
+router.get("/user/:userId", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        yield posts_controller_1.default.getPostBySenderId(req, res);
+    }
+    catch (error) {
+        next(error);
+    }
+}));
 /**
  * @swagger
  * /posts:
@@ -109,10 +124,11 @@ router.get("/filter", (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Post'
  */
-router.post("/", auth_controller_1.authMiddleware, posts_controller_1.default.addPost);
+router.post("/", multer_config_1.default.single("image"), posts_controller_1.default.addPost);
 /**
  * @swagger
  * /posts/{id}:
+ *
  *   get:
  *     summary: Get a post by ID
  *     tags: [Posts]
@@ -178,6 +194,9 @@ router.delete("/", auth_controller_1.authMiddleware, posts_controller_1.default.
  */
 router.put("/:id", auth_controller_1.authMiddleware, (req, res) => {
     posts_controller_1.default.updatePostById(req, res);
+});
+router.put("/like/:id", auth_controller_1.authMiddleware, (req, res) => {
+    posts_controller_1.default.addLike(req, res);
 });
 exports.default = router;
 //# sourceMappingURL=posts_routes.js.map
