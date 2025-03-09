@@ -31,12 +31,15 @@ app.use(
 //הגדלת הגודל שאפשר להעביר בבקשות (עשינו בשביל העברת התמונות לגימיני)
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/posts", postsRoutes);
 app.use("/comments", commentsRoutes);
 app.use("/users", usersRoutes);
 app.use("/auth", authRoutes);
+app.use("/gemini", geminiRoutes);
+
 app.use(
   "/uploads/profile_pictures",
   express.static(path.join(__dirname, "../uploads/profile_pictures"))
