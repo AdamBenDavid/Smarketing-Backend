@@ -2,7 +2,6 @@ import postModel, { Post } from "../modules/post_modules";
 import { Request, Response } from "express";
 
 const addPost = async (req: Request, res: Response) => {
-  console.log("add post");
 
   try {
     const { postData, senderId } = req.body;
@@ -23,9 +22,7 @@ const addPost = async (req: Request, res: Response) => {
 
 const getAllPosts = async (req: Request, res: Response) => {
   try {
-    console.log("get all posts");
     const posts = await postModel.find();
-    console.log("posts " + posts);
     res.send(posts);
   } catch (error) {
     res.status(400).send(error);
@@ -93,7 +90,6 @@ const getPostBySenderId = async (req: Request, res: Response) => {
 
     res.status(200).json(posts);
   } catch (err) {
-    console.error(" Error fetching user posts:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };

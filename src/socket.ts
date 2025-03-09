@@ -39,7 +39,6 @@ export const initializeSocket = (server: HTTPServer) => {
   });
 
   io.on('connection', async (socket) => {
-    console.log('User connected:', socket.data.userId);
     
     // Add user to connected users list
     connectedUsers.push({
@@ -54,17 +53,14 @@ export const initializeSocket = (server: HTTPServer) => {
 
     // Handle getOnlineUsers request
     socket.on('getOnlineUsers', async () => {
-      console.log('Received getOnlineUsers request');
       const onlineUserIds = connectedUsers.map(user => user.userId);
       const onlineUsers = await userModel.find({ _id: { $in: onlineUserIds } });
-      console.log('Sending online users:', onlineUsers);
       socket.emit('onlineUsers', onlineUsers);
     });
 
     // Handle chat history request
     socket.on('getChatHistory', async (data: { userId: string, partnerId: string }) => {
       try {
-        console.log('Fetching chat history for:', data);
         const messages = await chatMessageModel.find({
           $or: [
             { senderId: data.userId, recipientId: data.partnerId },
@@ -72,10 +68,8 @@ export const initializeSocket = (server: HTTPServer) => {
           ]
         }).sort({ timestamp: 1 });
         
-        console.log('Sending chat history:', messages);
         socket.emit('chat_history', messages);
       } catch (error) {
-        console.error('Error fetching chat history:', error);
         socket.emit('chat_history_error', { error: 'Failed to fetch chat history' });
       }
     });
@@ -144,7 +138,6 @@ export const initializeSocket = (server: HTTPServer) => {
 
     // Handle disconnection
     socket.on('disconnect', async () => {
-      console.log('User disconnected:', socket.data.userId);
       connectedUsers = connectedUsers.filter(user => user.socketId !== socket.id);
       
       // Broadcast updated online users list

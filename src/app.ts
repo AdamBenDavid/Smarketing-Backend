@@ -7,6 +7,5 @@ const port = process.env.PORT;
 
 initApp().then(() => {
   httpServer.listen(port, () => {
-    console.log(`server is running on port ${port}`);
   });
 });

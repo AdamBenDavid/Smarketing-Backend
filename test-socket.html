@@ -43,12 +43,10 @@
 
             socket.on('connect', () => {
                 updateStatus('Connected to server');
-                console.log('Socket ID:', socket.id);
             });
 
             socket.on('connect_error', (error) => {
                 updateStatus('Connection error: ' + error.message);
-                console.error('Connection error details:', error);
             });
 
             socket.on('disconnect', (reason) => {
@@ -65,7 +63,6 @@
 
             socket.io.on('error', (error) => {
                 updateStatus('Transport error: ' + error.message);
-                console.error('Transport error details:', error);
             });
         }
 
