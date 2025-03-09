@@ -9,6 +9,7 @@ import postsRoutes from "./routes/posts_routes";
 import commentsRoutes from "./routes/comments_routes";
 import usersRoutes from "./routes/users_routes";
 import authRoutes from "./routes/auth_routes";
+import geminiRoutes from "./routes/gemini_routes";
 import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUI from "swagger-ui-express";
 import cors from "cors";
@@ -27,31 +28,17 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+//הגדלת הגודל שאפשר להעביר בבקשות (עשינו בשביל העברת התמונות לגימיני)
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
-app.use(
-  "/uploads/profile_pictures",
-  express.static(path.join(__dirname, "../uploads/profile_pictures"))
-);
-app.use(
-  "/uploads/post_images",
-  express.static(path.join(__dirname, "../uploads/post_images"))
-);
-
-// ✅ FIX CORS ISSUES
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  next();
-});
-//touching here can couse a bug- be careful and check the photos at the profile + post images
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/posts", postsRoutes);
 app.use("/comments", commentsRoutes);
 app.use("/users", usersRoutes);
 app.use("/auth", authRoutes);
+app.use("/gemini", geminiRoutes);
 
 app.use(
   "/uploads/profile_pictures",
