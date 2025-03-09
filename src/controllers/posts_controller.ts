@@ -1,20 +1,36 @@
 import postModel, { Post } from "../modules/post_modules";
+import userModel from "../modules/user_modules";
+
+("../modules/user_modules");
 import { Request, Response } from "express";
 
 const addPost = async (req: Request, res: Response) => {
-
   try {
     const { postData, senderId } = req.body;
-    const image = req.file ? `/uploads/${req.file.filename}` : null;
+    if (!senderId) {
+      res.status(400).json({ error: "Sender ID is required" });
+    }
 
-    const post = new postModel({
-      postData,
-      senderId,
-      image,
-    });
+    const image = req.file ? `uploads/post_images/${req.file.filename}` : null;
 
+    const post = new postModel({ postData, senderId, image });
     await post.save();
-    res.status(201).json(post);
+
+    const user = await userModel
+      .findById(senderId)
+      .select("fullName profilePicture");
+
+    res.status(201).json({
+      _id: post._id,
+      postData: post.postData,
+      user: {
+        _id: user?._id,
+        fullName: user?.fullName || "משתמש אנונימי",
+        profilePicture: user?.profilePicture || "https://placehold.co/150x150",
+      },
+      image: image ? `http://localhost:3000/${image}` : null, // ✅ Fixed
+      comments: [],
+    });
   } catch (error) {
     res.status(400).json({ error: (error as Error).message });
   }
@@ -87,7 +103,7 @@ const getPostBySenderId = async (req: Request, res: Response) => {
     if (posts.length === 0) {
       return res.status(404).json({ message: "No posts found for this user" });
     }
-
+    //test
     res.status(200).json(posts);
   } catch (err) {
     res.status(500).json({ error: "Internal Server Error" });

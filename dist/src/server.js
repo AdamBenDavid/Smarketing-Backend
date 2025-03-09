@@ -30,6 +30,8 @@ app.use("/posts", posts_routes_1.default);
 app.use("/comments", comments_routes_1.default);
 app.use("/users", users_routes_1.default);
 app.use("/auth", auth_routes_1.default);
+app.use("/uploads", express_1.default.static("uploads"));
+// example for a photo location: http://localhost:3000/uploads/image-123456.jpg
 const options = {
     definition: {
         openapi: "3.0.0",

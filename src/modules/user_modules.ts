@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema<User>({
   },
   password: {
     type: String,
-    required: true,
+    required: true, //GENERATE RANDOM PASSWORD FOR GOOGLE SIGN IN
   },
   fullName: {
     type: String,
@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema<User>({
   refreshToken: {
     type: [String],
     default: [],
+  },
+  profilePicture: {
+    type: String,
+    required: false,
   },
 });
 
