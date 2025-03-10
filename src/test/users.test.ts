@@ -17,7 +17,6 @@ const testUser: newUser = {
 };
 
 beforeAll(async () => {
-  console.log("beforeAll");
   app = await initApp();
   await postModel.deleteMany();
 
@@ -31,7 +30,6 @@ beforeAll(async () => {
 });
 
 afterAll((done) => {
-  console.log("afterAll");
   mongoose.connection.close();
   done();
 });
@@ -41,15 +39,12 @@ let userId = "";
 describe("User Tests", () => {
   //create a user
   test("Test Create User", async () => {
-    console.log(testUsers[0]);
     const response = await request(app).post("/users").send(testUsers[0]);
-    console.log("response email: " + response.body.email);
     expect(response.statusCode).toBe(200);
     expect(response.body.email).toBe(testUsers[0].email);
     expect(response.body.fullName).toBe(testUsers[0].fullName);
     expect(response.body.password).toBe(testUsers[0].password);
     userId = response.body._id;
-    console.log("userId: " + userId);
   });
 
   test("User test get all", async () => {
@@ -60,7 +55,6 @@ describe("User Tests", () => {
 
   // add function- get user by id
   test("Test Get User by Id", async () => {
-    console.log("tests userId: " + userId);
 
     const response = await request(app).get(`/users/${userId}`);
     expect(response.statusCode).toBe(200);

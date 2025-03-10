@@ -5,10 +5,12 @@ dotenv.config();
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import express, { Express } from "express";
+import { createServer } from 'http';
 import postsRoutes from "./routes/posts_routes";
 import commentsRoutes from "./routes/comments_routes";
 import usersRoutes from "./routes/users_routes";
 import authRoutes from "./routes/auth_routes";
+import chatRoutes from "./routes/chat_routes";
 import geminiRoutes from "./routes/gemini_routes";
 import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUI from "swagger-ui-express";
@@ -18,8 +20,11 @@ import helmet from "helmet";
 
 console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
 console.log("DB_CONNECT:", process.env.DB_CONNECT);
+import { initializeSocket } from './socket';
 
 const app = express();
+const httpServer = createServer(app);
+
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -52,6 +57,9 @@ app.use(
 // example for a photo location:
 // profile: http://localhost:3000/uploads/profile_pictures/your-profile.jpg
 // posts: http://localhost:3000/uploads/post_images/your-post.jpg
+app.use("/chat", chatRoutes);
+app.use("/uploads", express.static("uploads"));
+app.use("/test", express.static("."));
 
 const options = {
   definition: {
@@ -80,6 +88,8 @@ const initApp = () => {
       mongoose
         .connect(process.env.DB_CONNECT)
         .then(() => {
+          // Initialize Socket.IO
+          initializeSocket(httpServer);
           resolve(app);
         })
         .catch((error) => {
@@ -89,4 +99,5 @@ const initApp = () => {
   });
 };
 
+export { httpServer };  // Export the HTTP server for use in app.ts
 export default initApp;

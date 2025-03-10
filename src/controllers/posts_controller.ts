@@ -32,9 +32,7 @@ const addPost = async (req: Request, res: Response) => {
 
 const getAllPosts = async (req: Request, res: Response) => {
   try {
-    console.log("get all posts");
     const posts = await postModel.find();
-    console.log("posts " + posts);
     res.send(posts);
   } catch (error) {
     res.status(400).send(error);
@@ -116,7 +114,6 @@ const getPostBySenderId = async (req: Request, res: Response) => {
     //test
     res.status(200).json(posts);
   } catch (err) {
-    console.error(" Error fetching user posts:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };

@@ -9,14 +9,12 @@ import { send } from "process";
 var app: Express;
 
 beforeAll(async () => {
-  console.log("beforeAll");
   app = await initApp();
   await userSchema.deleteMany();
   await postModel.deleteMany();
 });
 
 afterAll((done) => {
-  console.log("afterAll");
   mongoose.connection.close();
   done();
 });
