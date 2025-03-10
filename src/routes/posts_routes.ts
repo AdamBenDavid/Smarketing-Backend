@@ -115,7 +115,12 @@ router.get("/user/:userId", async (req, res, next) => {
  *             schema:
  *               $ref: '#/components/schemas/Post'
  */
-router.post("/", upload.single("image"), postsController.addPost);
+router.post(
+  "/",
+  authMiddleware,
+  upload.single("image"),
+  postsController.addPost
+);
 
 /**
  * @swagger
