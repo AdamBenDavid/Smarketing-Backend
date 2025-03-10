@@ -1,28 +1,33 @@
 import mongoose from "mongoose";
+import { User } from "./user_modules";
 
 export interface Post {
+  senderId: String;
   postData: string;
-  senderId: string; // This is the user id of the sender
-
+  comments?: Array<User>;
   image?: string;
-  likes?: number;
+  likes?: Array<User>;
 }
 
 const postSchema = new mongoose.Schema<Post>({
+  senderId: {
+    type: String,
+    required: true,
+  },
   postData: {
     type: String,
     required: true,
   },
-  senderId: {
-    type: String,
-    required: true,
+  comments: {
+    type: Array,
+    required: false,
   },
   image: {
     type: String,
     required: false,
   },
   likes: {
-    type: Number,
+    type: Array,
     required: false,
   },
 });

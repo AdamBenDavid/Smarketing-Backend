@@ -7,6 +7,8 @@ import { Request, Response } from "express";
 const addPost = async (req: Request, res: Response) => {
   try {
     const { postData, senderId } = req.body;
+    console.log("postData " + postData);
+    console.log("senderId " + senderId);
     if (!senderId) {
       res.status(400).json({ error: "Sender ID is required" });
     }
@@ -16,22 +18,14 @@ const addPost = async (req: Request, res: Response) => {
     const post = new postModel({ postData, senderId, image });
     await post.save();
 
-    const user = await userModel
-      .findById(senderId)
-      .select("fullName profilePicture");
-
     res.status(201).json({
       _id: post._id,
       postData: post.postData,
-      user: {
-        _id: user?._id,
-        fullName: user?.fullName || "משתמש אנונימי",
-        profilePicture: user?.profilePicture || "https://placehold.co/150x150",
-      },
+      sender: senderId,
       image: image ? `http://localhost:3000/${image}` : null, // ✅ Fixed
-      comments: [],
     });
   } catch (error) {
+    console.log("error " + error);
     res.status(400).json({ error: (error as Error).message });
   }
 };
