@@ -68,6 +68,60 @@ const router = express.Router();
  */
 
 router.post("/register", authController.register);
+
+/**
+ * @swagger
+ * /auth/google:
+ *   post:
+ *     summary: Google Sign-In
+ *     description: Authenticate user using Google OAuth and return tokens
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               credential:
+ *                 type: string
+ *                 description: Google credential token
+ *                 example: ya29.a0AfH6SM...
+ *     responses:
+ *       200:
+ *         description: Successful login via Google
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *                 refreshToken:
+ *                   type: string
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: 60d0fe4f5311236168a109ca
+ *                     email:
+ *                       type: string
+ *                       example: user@gmail.com
+ *                     fullName:
+ *                       type: string
+ *                       example: John Doe
+ *                     profilePicture:
+ *                       type: string
+ *                       example: https://lh3.googleusercontent.com/a-/AOh14...
+ *       400:
+ *         description: Invalid Google credential
+ *       500:
+ *         description: Server error
+ */
 router.post("/google", authController.googleSignin);
 
 /**
@@ -178,6 +232,7 @@ router.post("/logout", authController.logout);
 
 router.put(
   "/profile/:id",
+  authMiddleware,
   upload.single("profilePicture"),
   authController.updateProfile
 );
