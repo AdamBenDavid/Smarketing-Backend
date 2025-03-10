@@ -70,6 +70,20 @@ const deletePosts = async (req: Request, res: Response) => {
   }
 };
 
+const deletePostById = async (req: Request, res: Response) => {
+  console.log("delete post by id");
+  const postId = req.params.id;
+  try {
+    const deletedPost = await postModel.findByIdAndDelete(postId);
+    if (!deletedPost) {
+      res.status(404).json({ message: "Post not found" });
+    }
+    res.status(200).json({ message: "Post deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 const updatePostById = async (req: Request, res: Response) => {
   const postId = req.params.id;
   const { postData, image } = req.body;
@@ -140,4 +154,5 @@ export default {
   updatePostById,
   getPostBySenderId,
   addLike,
+  deletePostById,
 };

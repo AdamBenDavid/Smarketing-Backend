@@ -162,6 +162,29 @@ router.delete("/", authMiddleware, postsController.deletePosts);
 /**
  * @swagger
  * /posts/{id}:
+ *   delete:
+ *     summary: Delete a post by ID
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The post ID
+ *     responses:
+ *       200:
+ *         description: Post deleted successfully
+ *       404:
+ *         description: Post not found
+ */
+router.delete("/:id", authMiddleware, postsController.deletePostById);
+
+/**
+ * @swagger
+ * /posts/{id}:
  *   put:
  *     summary: Update a post by ID
  *     tags: [Posts]
