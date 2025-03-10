@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 
 export interface User {
-  email: string;
-  fullName: string;
-  password: string;
   _id?: string;
-  profilePicture?: string;
+  email: string;
+  password: string;
+  fullName: string;
   refreshToken?: string[];
+  profilePicture?: string;
   role?: string;
 }
 
