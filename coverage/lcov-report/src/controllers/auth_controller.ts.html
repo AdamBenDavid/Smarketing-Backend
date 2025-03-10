@@ -732,13 +732,11 @@ export const authMiddleware = (
   res: Response,
   next: NextFunction
 ) =&gt; {
-  console.log("authMiddleware");
 &nbsp;
   const authorization = req.header("authorization");
   const token = authorization &amp;&amp; authorization.split(" ")[1];
 &nbsp;
   if (!token) {
-    console.log("token " + token);
     res.status(401).send("Access Denied");
     return;
   }
