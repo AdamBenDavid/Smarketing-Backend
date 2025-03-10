@@ -7,6 +7,7 @@ export interface User {
   fullName: string;
   refreshToken?: string[];
   profilePicture?: string;
+  role?: string;
 }
 
 const userSchema = new mongoose.Schema<User>({
