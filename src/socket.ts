@@ -24,17 +24,23 @@ export const initializeSocket = (server: HTTPServer) => {
 
   // Middleware to authenticate socket connections
   io.use((socket, next) => {
-    const token = socket.handshake.auth.token; 
+    const token = socket.handshake.auth.token;
     if (!token) {
-      return next(new Error('Authentication error'));
+      return next(new Error('Authentication error - No token'));
     }
 
     try {
-      const decoded = jwt.verify(token, process.env.TOKEN_SECRET!) as { _id: string };
+      // Verify token without Bearer prefix
+      const decoded = jwt.verify(token, process.env.TOKEN_SECRET!) as { _id: string, random: string };
+      if (!decoded._id) {
+        return next(new Error('Authentication error - Invalid token payload'));
+      }
+      
       socket.data.userId = decoded._id;
       next();
     } catch (err) {
-      next(new Error('Authentication error'));
+      console.error('[Socket] Auth error:', err);
+      next(new Error('Authentication error - Invalid token'));
     }
   });
 

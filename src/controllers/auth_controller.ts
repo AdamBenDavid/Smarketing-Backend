@@ -294,7 +294,6 @@ export const authMiddleware = (
   res: Response,
   next: NextFunction
 ) => {
-
   const authorization = req.header("authorization");
   const token = authorization && authorization.split(" ")[1];
 
@@ -307,15 +306,14 @@ export const authMiddleware = (
     return;
   }
 
-  jwt.verify(token, process.env.TOKEN_SECRET, (err, payload) => {
-    if (err) {
-      res.status(401).send("Access Denied");
-      return;
-    }
-
-    req.params.userId = (payload as Payload)._id;
+  try {
+    const decoded = jwt.verify(token, process.env.TOKEN_SECRET) as { _id: string, random: string };
+    req.params.userId = decoded._id;
     next();
-  });
+  } catch (err) {
+    res.status(401).send("Access Denied");
+    return;
+  }
 };
 
 const updateProfile = async (req: Request, res: Response): Promise<void> => {
