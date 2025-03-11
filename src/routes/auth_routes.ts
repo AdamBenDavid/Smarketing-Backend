@@ -232,10 +232,11 @@ router.post("/logout", authController.logout);
 
 router.put(
   "/profile/:id",
+  authMiddleware,
   upload.single("profilePicture"),
   authController.updateProfile
 );
 
-router.get("/profile/:id", authController.getUserById);
+router.get("/profile/:id", authMiddleware, authController.getUserById);
 
 export default router;
