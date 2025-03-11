@@ -175,9 +175,7 @@ const login = async (req: Request, res: Response) => {
       _id: user._id,
       fullName: user.fullName,
       profilePicture: user.profilePicture
-        ? `http://localhost:3000/uploads/profile_pictures/${user.profilePicture
-            .split("/")
-            .pop()}`
+        ? `http://localhost:3000/${user.profilePicture}`
         : null,
     });
   } catch (err) {

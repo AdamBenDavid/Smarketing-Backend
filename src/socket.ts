@@ -54,13 +54,37 @@ export const initializeSocket = (server: HTTPServer) => {
 
     // Broadcast updated online users list to all clients
     const onlineUserIds = connectedUsers.map(user => user.userId);
-    const onlineUsers = await userModel.find({ _id: { $in: onlineUserIds } });
+    const onlineUsers = await userModel.find(
+      { _id: { $in: onlineUserIds } },
+      {
+        _id: 1,
+        email: 1,
+        fullName: 1,
+        profilePicture: 1,
+        role: 1,
+        expertise: 1,
+        online: 1,
+        lastSeen: 1
+      }
+    );
     io.emit('onlineUsers', onlineUsers);
 
     // Handle getOnlineUsers request
     socket.on('getOnlineUsers', async () => {
       const onlineUserIds = connectedUsers.map(user => user.userId);
-      const onlineUsers = await userModel.find({ _id: { $in: onlineUserIds } });
+      const onlineUsers = await userModel.find(
+        { _id: { $in: onlineUserIds } },
+        {
+          _id: 1,
+          email: 1,
+          fullName: 1,
+          profilePicture: 1,
+          role: 1,
+          expertise: 1,
+          online: 1,
+          lastSeen: 1
+        }
+      );
       socket.emit('onlineUsers', onlineUsers);
     });
 
@@ -148,7 +172,19 @@ export const initializeSocket = (server: HTTPServer) => {
       
       // Broadcast updated online users list
       const onlineUserIds = connectedUsers.map(user => user.userId);
-      const onlineUsers = await userModel.find({ _id: { $in: onlineUserIds } });
+      const onlineUsers = await userModel.find(
+        { _id: { $in: onlineUserIds } },
+        {
+          _id: 1,
+          email: 1,
+          fullName: 1,
+          profilePicture: 1,
+          role: 1,
+          expertise: 1,
+          online: 1,
+          lastSeen: 1
+        }
+      );
       io.emit('onlineUsers', onlineUsers);
     });
   });
