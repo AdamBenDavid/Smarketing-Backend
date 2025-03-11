@@ -238,4 +238,6 @@ router.put(
 
 router.get("/profile/:id", authController.getUserById);
 
+router.get('/user/:id', authController.getUserById);
+
 export default router;
