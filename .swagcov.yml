@@ -1,0 +1,3 @@
+swaggerFile: "http://localhost:3000/api-docs/#/"
+outputDir: "./swagger-coverage-report"
+runCoverage: true

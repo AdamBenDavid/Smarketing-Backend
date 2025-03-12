@@ -230,15 +230,57 @@ router.post("/refresh", authController.refresh);
  */
 router.post("/logout", authController.logout);
 
+/**
+ * @swagger
+ * /auth/profile/{id}:
+ *   get:
+ *     summary: קבלת פרטי משתמש לפי מזהה
+ *     description: מחזיר מידע על משתמש מסוים
+ *     tags:
+ *       - Auth
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: מזהה המשתמש
+ *     responses:
+ *       200:
+ *         description: פרטי המשתמש הוחזרו בהצלחה
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 _id:
+ *                   type: string
+ *                   example: "60d0fe4f5311236168a109ca"
+ *                 email:
+ *                   type: string
+ *                   example: "user@gmail.com"
+ *                 fullName:
+ *                   type: string
+ *                   example: "John Doe"
+ *                 profilePicture:
+ *                   type: string
+ *                   example: "https://example.com/profile.jpg"
+ *       400:
+ *         description: מזהה משתמש לא תקין
+ *       401:
+ *         description: לא מורשה (חסר טוקן)
+ *       404:
+ *         description: משתמש לא נמצא
+ *       500:
+ *         description: שגיאת שרת
+ */
 router.put(
   "/profile/:id",
   authMiddleware,
   upload.single("profilePicture"),
   authController.updateProfile
 );
-
-router.get("/profile/:id", authMiddleware, authController.getUserById);
-
-router.get('/user/:id', authController.getUserById);
 
 export default router;

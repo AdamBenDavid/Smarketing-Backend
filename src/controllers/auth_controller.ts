@@ -305,7 +305,10 @@ export const authMiddleware = (
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.TOKEN_SECRET) as { _id: string, random: string };
+    const decoded = jwt.verify(token, process.env.TOKEN_SECRET) as {
+      _id: string;
+      random: string;
+    };
     req.params.userId = decoded._id;
     next();
   } catch (err) {
@@ -369,23 +372,6 @@ const updateProfile = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-const getUserById = async (req: Request, res: Response): Promise<void> => {
-  const userId = req.params.id;
-
-  try {
-    const user = await userModel.findById(userId).select("-password");
-    if (!user) {
-      res.status(404).send({ message: "User not found" });
-      return;
-    }
-
-    res.status(200).send(user);
-  } catch (error) {
-    console.error(" Error fetching user:", error);
-    res.status(500).send({ message: "Server error" });
-  }
-};
-
 export default {
   register,
   login,
@@ -393,5 +379,4 @@ export default {
   logout,
   googleSignin,
   updateProfile,
-  getUserById,
 };

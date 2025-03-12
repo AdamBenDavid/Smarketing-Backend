@@ -12,6 +12,35 @@ import { authMiddleware } from "../controllers/auth_controller";
 
 /**
  * @swagger
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *   schemas:
+ *     User:
+ *       type: object
+ *       required:
+ *         - email
+ *         - fullName
+ *       properties:
+ *         email:
+ *           type: string
+ *           description: User's email address
+ *           example: "john.doe@example.com"
+ *         fullName:
+ *           type: string
+ *           description: User's full name
+ *           example: "John Doe"
+ *         password:
+ *           type: string
+ *           description: User's password
+ *           example: "mypassword123"
+ */
+
+/**
+ * @swagger
  * /users:
  *   get:
  *     summary: Get all users
@@ -25,8 +54,9 @@ import { authMiddleware } from "../controllers/auth_controller";
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/User'
+ *       500:
+ *         description: Server error
  */
-
 router.get("/", usersController.getAllUsers);
 
 /**
@@ -48,8 +78,11 @@ router.get("/", usersController.getAllUsers);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Invalid input data
+ *       500:
+ *         description: Server error
  */
-
 router.post("/", usersController.createUser);
 
 /**
@@ -61,10 +94,11 @@ router.post("/", usersController.createUser);
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
  *         description: The user ID
+ *         example: "60d0fe4f5311236168a109ca"
  *     responses:
  *       200:
  *         description: User details
@@ -74,62 +108,28 @@ router.post("/", usersController.createUser);
  *               $ref: '#/components/schemas/User'
  *       404:
  *         description: User not found
+ *       500:
+ *         description: Server error
  */
-
 router.get("/:id", usersController.getUserById);
-
-/**
- * @swagger
- * /users/{id}/:
- *   put:
- *     summary: Update user password by ID
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: The user ID
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               password:
- *                 type: string
- *                 example: newpassword123
- *     responses:
- *       200:
- *         description: Password updated successfully
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: User not found
- */
-router.put("/:id", authMiddleware, (req, res) => {
-  usersController.updatePasswordById(req, res);
-});
 
 /**
  * @swagger
  * /users/{id}:
  *   put:
- *     summary: Update user's favorite pattern by ID
+ *     summary: Update user details
+ *     description: Update user full name and/or password
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
  *         description: The user ID
+ *         example: "60d0fe4f5311236168a109ca"
  *     requestBody:
  *       required: true
  *       content:
@@ -139,14 +139,21 @@ router.put("/:id", authMiddleware, (req, res) => {
  *             properties:
  *               fullName:
  *                 type: string
- *                 example: adam smith
+ *                 example: "Adam Smith"
+ *               password:
+ *                 type: string
+ *                 example: "newpassword123"
  *     responses:
  *       200:
- *         description: Favorite pattern updated successfully
+ *         description: User updated successfully
+ *       400:
+ *         description: Invalid request data
  *       401:
  *         description: Unauthorized
  *       404:
  *         description: User not found
+ *       500:
+ *         description: Server error
  */
 router.put("/:id", authMiddleware, (req, res) => {
   usersController.updateFullNameById(req, res);
@@ -163,17 +170,22 @@ router.put("/:id", authMiddleware, (req, res) => {
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
  *         description: The user ID
+ *         example: "60d0fe4f5311236168a109ca"
  *     responses:
  *       200:
  *         description: User deleted successfully
+ *       400:
+ *         description: Invalid request data
  *       401:
  *         description: Unauthorized
  *       404:
  *         description: User not found
+ *       500:
+ *         description: Server error
  */
 router.delete("/:id", authMiddleware, (req, res) => {
   usersController.deleteUserById(req, res);

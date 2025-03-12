@@ -18,16 +18,6 @@ import { authMiddleware } from "../controllers/auth_controller";
  *       type: http
  *       scheme: bearer
  *       bearerFormat: JWT
- */
-
-/**
- * @swagger
- * components:
- *   securitySchemes:
- *     bearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
  *   schemas:
  *     Comment:
  *       type: object
@@ -38,17 +28,16 @@ import { authMiddleware } from "../controllers/auth_controller";
  *       properties:
  *         userId:
  *           type: string
- *           description: The user id
+ *           description: The user ID
+ *           example: "60d0fe4f5311236168a109ca"
  *         commentData:
  *           type: string
  *           description: The content of the comment
+ *           example: "This is a comment"
  *         postId:
  *           type: string
  *           description: The ID of the post
- *       example:
- *         userId: '12345'
- *         commentData: 'This is a comment'
- *         postId: '67890'
+ *           example: "67890"
  */
 
 /**
@@ -58,7 +47,7 @@ import { authMiddleware } from "../controllers/auth_controller";
  *     summary: Add a new comment
  *     tags: [Comments]
  *     security:
- *       - bearerAuth: [] # שימוש באבטחה
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -66,18 +55,19 @@ import { authMiddleware } from "../controllers/auth_controller";
  *           schema:
  *             $ref: '#/components/schemas/Comment'
  *     responses:
- *       200:
- *         description: The created comment
+ *       201:
+ *         description: Comment created successfully
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Comment'
+ *       400:
+ *         description: Invalid request data
  *       401:
  *         description: Unauthorized. Missing or invalid token.
  *       500:
  *         description: Internal server error.
  */
-
 router.post("/", authMiddleware, commentsController.addComment);
 
 /**
@@ -95,8 +85,38 @@ router.post("/", authMiddleware, commentsController.addComment);
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Comment'
+ *       500:
+ *         description: Internal server error
  */
 router.get("/", commentsController.getAllComments);
+
+/**
+ * @swagger
+ * /comments/{id}:
+ *   get:
+ *     summary: Get a comment by ID
+ *     tags: [Comments]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The comment ID
+ *         example: "61f0a5e7d36f3a5b6b8e3f2a"
+ *     responses:
+ *       200:
+ *         description: The requested comment
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Comment'
+ *       404:
+ *         description: Comment not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/:id", commentsController.getCommentById);
 
 /**
  * @swagger
@@ -104,15 +124,16 @@ router.get("/", commentsController.getAllComments);
  *   put:
  *     summary: Update a comment by ID
  *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
  *         description: The comment ID
- *     security:
- *       - bearerAuth: []
+ *         example: "61f0a5e7d36f3a5b6b8e3f2a"
  *     requestBody:
  *       required: true
  *       content:
@@ -127,39 +148,16 @@ router.get("/", commentsController.getAllComments);
  *             schema:
  *               $ref: '#/components/schemas/Comment'
  *       400:
- *         description: Missing required parameters or invalid request body.
+ *         description: Invalid request data
  *       404:
- *         description: Comment not found.
+ *         description: Comment not found
  *       500:
- *         description: Internal server error.
+ *         description: Internal server error
  */
+
 router.put("/:id", authMiddleware, (req, res) => {
   commentsController.updateCommentById(req, res);
 });
-
-router.get("/:id", commentsController.getCommentById);
-/**
- * @swagger
- * /comments/{id}:
- *   get:
- *     summary: Get a comment by ID
- *     tags: [Comments]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: The comment ID
- *     responses:
- *       200:
- *         description: The requested comment
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Comment'
- */
-router.get("/:id", commentsController.getCommentById);
 
 /**
  * @swagger
@@ -167,39 +165,27 @@ router.get("/:id", commentsController.getCommentById);
  *   delete:
  *     summary: Delete a comment by ID
  *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
  *         description: The comment ID to delete
- *     security:
- *       - bearerAuth: [] # דורש הרשאה עם Bearer Token
+ *         example: "61f0a5e7d36f3a5b6b8e3f2a"
  *     responses:
  *       200:
- *         description: Successfully deleted the comment
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Comment'
+ *         description: Comment deleted successfully
  *       400:
- *         description: Bad request. The provided ID is invalid or missing.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   description: Error details.
+ *         description: Invalid request data
  *       404:
- *         description: Comment not found.
+ *         description: Comment not found
  *       500:
- *         description: Internal server error.
+ *         description: Internal server error
  */
 router.delete("/:id", authMiddleware, (req, res) => {
   commentsController.deleteCommentById(req, res);
 });
-
 export default router;

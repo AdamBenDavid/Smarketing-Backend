@@ -19,11 +19,6 @@ import upload from "../multer.config";
  *       type: http
  *       scheme: bearer
  *       bearerFormat: JWT
- */
-
-/**
- * @swagger
- * components:
  *   schemas:
  *     Post:
  *       type: object
@@ -34,12 +29,11 @@ import upload from "../multer.config";
  *         postData:
  *           type: string
  *           description: The content of the post
+ *           example: "This is a post content"
  *         senderId:
  *           type: string
  *           description: The ID of the user who created the post
- *       example:
- *         postData: 'This is a post content'
- *         senderId: '12345'
+ *           example: "60d0fe4f5311236168a109ca"
  */
 
 /**
@@ -57,25 +51,28 @@ import upload from "../multer.config";
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Post'
+ *       500:
+ *         description: Server error
  */
 router.get("/", postsController.getAllPosts);
 
 /**
  * @swagger
- * /posts/filter:
+ * /posts/user/{userId}:
  *   get:
- *     summary: Get posts by sender ID
+ *     summary: Get posts by user ID
  *     tags: [Posts]
  *     parameters:
- *       - in: query
- *         name: senderId
+ *       - in: path
+ *         name: userId
  *         schema:
  *           type: string
  *         required: true
  *         description: The ID of the user who created the post
+ *         example: "60d0fe4f5311236168a109ca"
  *     responses:
  *       200:
- *         description: List of posts by sender ID
+ *         description: List of posts by user ID
  *         content:
  *           application/json:
  *             schema:
@@ -114,6 +111,8 @@ router.get("/user/:userId", async (req, res, next) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Post'
+ *       400:
+ *         description: Invalid input data
  */
 router.post(
   "/",
@@ -125,7 +124,6 @@ router.post(
 /**
  * @swagger
  * /posts/{id}:
- *
  *   get:
  *     summary: Get a post by ID
  *     tags: [Posts]
@@ -136,6 +134,7 @@ router.post(
  *           type: string
  *         required: true
  *         description: The post ID
+ *         example: "61f0a5e7d36f3a5b6b8e3f2a"
  *     responses:
  *       200:
  *         description: Post details
@@ -147,22 +146,6 @@ router.post(
  *         description: Post not found
  */
 router.get("/:id", postsController.getPostById);
-
-/**
- * @swagger
- * /posts:
- *   delete:
- *     summary: Delete all posts
- *     tags: [Posts]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: All posts deleted successfully
- *       500:
- *         description: Server error
- */
-router.delete("/", authMiddleware, postsController.deletePosts);
 
 /**
  * @swagger
@@ -179,6 +162,7 @@ router.delete("/", authMiddleware, postsController.deletePosts);
  *           type: string
  *         required: true
  *         description: The post ID
+ *         example: "61f0a5e7d36f3a5b6b8e3f2a"
  *     responses:
  *       200:
  *         description: Post deleted successfully
@@ -201,7 +185,8 @@ router.delete("/:id", authMiddleware, postsController.deletePostById);
  *         schema:
  *           type: string
  *         required: true
- *         description: Updated post ID
+ *         description: The post ID
+ *         example: "61f0a5e7d36f3a5b6b8e3f2a"
  *     requestBody:
  *       required: true
  *       content:
@@ -211,14 +196,39 @@ router.delete("/:id", authMiddleware, postsController.deletePostById);
  *     responses:
  *       200:
  *         description: Post updated successfully
+ *       400:
+ *         description: Invalid input data
  *       404:
  *         description: Post not found
  */
-
 router.put("/:id", authMiddleware, upload.single("image"), (req, res) => {
   postsController.updatePostById(req, res);
 });
 
+/**
+ * @swagger
+ * /posts/like/{id}:
+ *   put:
+ *     summary: Like a post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The post ID to like
+ *         example: "61f0a5e7d36f3a5b6b8e3f2a"
+ *     responses:
+ *       200:
+ *         description: Post liked successfully
+ *       400:
+ *         description: Invalid request data
+ *       404:
+ *         description: Post not found
+ */
 router.put("/like/:id", authMiddleware, (req, res) => {
   postsController.addLike(req, res);
 });
