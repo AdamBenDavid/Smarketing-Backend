@@ -138,7 +138,6 @@ const getPostBySenderId = async (req: Request, res: Response) => {
   }
 };
 
-// ✅ פונקציה להוספת לייק
 const addLike = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
@@ -150,7 +149,6 @@ const addLike = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // ✅ בדיקה שה-likes קיים והוא מערך
     if (!Array.isArray(post.likes)) post.likes = [];
 
     if (!post.likes.includes(userId)) {
@@ -164,11 +162,10 @@ const addLike = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-// ✅ פונקציה להסרת לייק
 const removeLike = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params; // postId
-    const { userId } = req.body; // נקבל את userId מה-Frontend
+    const { id } = req.params;
+    const { userId } = req.body;
 
     if (!userId) {
       res.status(400).json({ message: "User ID is required" });
@@ -181,10 +178,8 @@ const removeLike = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // ✅ אם `likes` לא מוגדר, נאתחל אותו כמערך ריק
     if (!Array.isArray(post.likes)) post.likes = [];
 
-    // ✅ מסירים את userId אם קיים
     post.likes = post.likes.filter(
       (like) => like.toString() !== userId.toString()
     );
