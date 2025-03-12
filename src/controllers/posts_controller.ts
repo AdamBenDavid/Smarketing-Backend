@@ -138,22 +138,61 @@ const getPostBySenderId = async (req: Request, res: Response) => {
   }
 };
 
-const addLike = async (req: Request, res: Response) => {
-  const postId = req.params.id;
+// ✅ פונקציה להוספת לייק
+const addLike = async (req: Request, res: Response): Promise<void> => {
   try {
-    const updatedPost = await postModel.findByIdAndUpdate(
-      postId,
-      { $inc: { likes: 1 } },
-      { new: true }
-    );
+    const { id } = req.params;
+    const { userId } = req.body;
 
-    if (!updatedPost) {
-      return res.status(404).json({ message: "Post not found" });
+    const post = await postModel.findById(id);
+    if (!post) {
+      res.status(404).json({ message: "Post not found" });
+      return;
     }
 
-    res.status(200).json(updatedPost);
+    // ✅ בדיקה שה-likes קיים והוא מערך
+    if (!Array.isArray(post.likes)) post.likes = [];
+
+    if (!post.likes.includes(userId)) {
+      post.likes.push(userId);
+      await post.save();
+    }
+
+    res.status(200).json({ message: "Post liked", likes: post.likes.length });
   } catch (error) {
-    res.status(500).json({ message: "Internal Server Error", error });
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+// ✅ פונקציה להסרת לייק
+const removeLike = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params; // postId
+    const { userId } = req.body; // נקבל את userId מה-Frontend
+
+    if (!userId) {
+      res.status(400).json({ message: "User ID is required" });
+      return;
+    }
+
+    const post = await postModel.findById(id);
+    if (!post) {
+      res.status(404).json({ message: "Post not found" });
+      return;
+    }
+
+    // ✅ אם `likes` לא מוגדר, נאתחל אותו כמערך ריק
+    if (!Array.isArray(post.likes)) post.likes = [];
+
+    // ✅ מסירים את userId אם קיים
+    post.likes = post.likes.filter(
+      (like) => like.toString() !== userId.toString()
+    );
+
+    await post.save();
+    res.status(200).json({ message: "Like removed", likes: post.likes.length });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
   }
 };
 
@@ -165,5 +204,6 @@ export default {
   updatePostById,
   getPostBySenderId,
   addLike,
+  removeLike,
   deletePostById,
 };

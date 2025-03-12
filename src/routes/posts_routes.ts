@@ -229,8 +229,11 @@ router.put("/:id", authMiddleware, upload.single("image"), (req, res) => {
  *       404:
  *         description: Post not found
  */
-router.put("/like/:id", authMiddleware, (req, res) => {
-  postsController.addLike(req, res);
-});
+// router.put("/like/:id", authMiddleware, (req, res) => {
+//   postsController.addLike(req, res);
+// });
+
+router.put("/like/:id", authMiddleware, postsController.addLike);
+router.put("/unlike/:id", authMiddleware, postsController.removeLike);
 
 export default router;
