@@ -129,9 +129,9 @@ const getPostBySenderId = async (req: Request, res: Response) => {
     const posts = await postModel.find({ senderId: userId }); // Find posts by senderId
 
     if (posts.length === 0) {
-      return res.status(404).json({ message: "No posts found for this user" });
+      return res.status(200).json({ message: "No posts found for this user" });
     }
-    //test
+
     res.status(200).json(posts);
   } catch (err) {
     res.status(500).json({ error: "Internal Server Error" });
