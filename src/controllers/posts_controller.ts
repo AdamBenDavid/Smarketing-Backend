@@ -1,5 +1,6 @@
 import postModel, { Post } from "../modules/post_modules";
 import userModel from "../modules/user_modules";
+import multer from "multer";
 
 ("../modules/user_modules");
 import { Request, Response } from "express";
@@ -7,8 +8,8 @@ import { Request, Response } from "express";
 const addPost = async (req: Request, res: Response) => {
   try {
     const { postData, senderId } = req.body;
-    console.log("postData " + postData);
-    console.log("senderId " + senderId);
+    console.log("backend postData " + postData);
+    console.log("backend senderId " + senderId);
     if (!senderId) {
       res.status(400).json({ error: "Sender ID is required" });
     }
@@ -22,7 +23,7 @@ const addPost = async (req: Request, res: Response) => {
       _id: post._id,
       postData: post.postData,
       sender: senderId,
-      image: image ? `http://localhost:3000/${image}` : null, // ✅ Fixed
+      image: image ? `http://localhost:3000/${image}` : null,
     });
   } catch (error) {
     console.log("error " + error);
@@ -76,11 +77,29 @@ const deletePostById = async (req: Request, res: Response) => {
   }
 };
 
+const upload = multer({ dest: "uploads/post_images" });
+
 const updatePostById = async (req: Request, res: Response) => {
   const postId = req.params.id;
-  const { postData, image } = req.body;
+  console.log("postId " + postId);
+
+  const { postData } = req.body;
+  console.log("backend postData " + postData);
 
   try {
+    // קבלת הפוסט מה-DB כדי לבדוק אם יש תמונה קיימת
+    const existingPost = await postModel.findById(postId);
+    if (!existingPost) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    // שמירת הנתיב הקיים של התמונה אם לא הועלה קובץ חדש
+    const image = req.file
+      ? `uploads/post_images/${req.file.filename}`
+      : existingPost.image;
+    console.log("backend image " + image);
+
+    // עדכון הפוסט
     const updatedPost = await postModel.findByIdAndUpdate(
       postId,
       { postData, image },
@@ -88,8 +107,9 @@ const updatePostById = async (req: Request, res: Response) => {
     );
 
     if (!updatedPost) {
-      return res.status(404).send("Post not found");
+      return res.status(404).json({ error: "Post not found" });
     }
+
     res.status(200).json(updatedPost);
   } catch (error) {
     res.status(400).json({ error: (error as Error).message });

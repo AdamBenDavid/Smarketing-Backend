@@ -214,7 +214,8 @@ router.delete("/:id", authMiddleware, postsController.deletePostById);
  *       404:
  *         description: Post not found
  */
-router.put("/:id", authMiddleware, (req, res) => {
+
+router.put("/:id", authMiddleware, upload.single("image"), (req, res) => {
   postsController.updatePostById(req, res);
 });
 
