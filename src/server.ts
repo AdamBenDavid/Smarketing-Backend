@@ -5,7 +5,7 @@ dotenv.config();
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import express, { Express } from "express";
-import { createServer } from 'http';
+import { createServer } from "http";
 import postsRoutes from "./routes/posts_routes";
 import commentsRoutes from "./routes/comments_routes";
 import usersRoutes from "./routes/users_routes";
@@ -20,7 +20,7 @@ import helmet from "helmet";
 
 console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
 console.log("DB_CONNECT:", process.env.DB_CONNECT);
-import { initializeSocket } from './socket';
+import { initializeSocket } from "./socket";
 
 const app = express();
 const httpServer = createServer(app);
@@ -53,6 +53,8 @@ app.use(
   "/uploads/post_images",
   express.static(path.join(__dirname, "../uploads/post_images"))
 );
+
+app.use("/images", express.static(path.join(__dirname, "../images")));
 
 // example for a photo location:
 // profile: http://localhost:3000/uploads/profile_pictures/your-profile.jpg
@@ -99,5 +101,5 @@ const initApp = () => {
   });
 };
 
-export { httpServer };  // Export the HTTP server for use in app.ts
+export { httpServer }; // Export the HTTP server for use in app.ts
 export default initApp;
