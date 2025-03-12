@@ -91,7 +91,6 @@ const generateToken = async (user: Document & User) => {
 
 const register = async (req: Request, res: Response) => {
   try {
-    console.log("reg body" + req.body.fullName);
     const password = req.body.password;
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -100,7 +99,6 @@ const register = async (req: Request, res: Response) => {
       fullName: req.body.fullName,
       password: hashedPassword,
     });
-    console.log("register user" + user);
     res.status(200).send(user);
   } catch (err) {
     res.status(400).send(err);
