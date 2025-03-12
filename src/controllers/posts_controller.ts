@@ -138,22 +138,61 @@ const getPostBySenderId = async (req: Request, res: Response) => {
   }
 };
 
-const addLike = async (req: Request, res: Response) => {
-  const postId = req.params.id;
-  try {
-    const updatedPost = await postModel.findByIdAndUpdate(
-      postId,
-      { $inc: { likes: 1 } },
-      { new: true }
-    );
+const addLike = async (req: Request, res: Response): Promise<void> => {
+  console.log("🔹 req.params:", JSON.stringify(req.params, null, 2));
 
-    if (!updatedPost) {
-      return res.status(404).json({ message: "Post not found" });
+  const { postId } = req.params;
+  const { userId } = req.body;
+
+  console.log("🔹 postId:", postId);
+  console.log("🔹 userId:", userId);
+
+  try {
+    const post = await postModel.findById(postId);
+    if (!post) {
+      res.status(404).json({ message: "Post not found" });
+      return;
     }
 
-    res.status(200).json(updatedPost);
+    if (!Array.isArray(post.likes)) post.likes = [];
+
+    if (!post.likes.includes(userId)) {
+      post.likes.push(userId);
+      await post.save();
+    }
+
+    res.status(200).json({ message: "Post liked", likes: post.likes.length });
   } catch (error) {
-    res.status(500).json({ message: "Internal Server Error", error });
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+const removeLike = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { postId } = req.params;
+    const { userId } = req.body;
+
+    if (!userId) {
+      res.status(400).json({ message: "User ID is required" });
+      return;
+    }
+
+    const post = await postModel.findById(postId);
+    if (!post) {
+      res.status(404).json({ message: "Post not found" });
+      return;
+    }
+
+    if (!Array.isArray(post.likes)) post.likes = [];
+
+    post.likes = post.likes.filter(
+      (like) => like.toString() !== userId.toString()
+    );
+
+    await post.save();
+    res.status(200).json({ message: "Like removed", likes: post.likes.length });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
   }
 };
 
@@ -165,5 +204,6 @@ export default {
   updatePostById,
   getPostBySenderId,
   addLike,
+  removeLike,
   deletePostById,
 };
