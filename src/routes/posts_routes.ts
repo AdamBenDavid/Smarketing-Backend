@@ -7,23 +7,16 @@ import upload from "../multer.config";
 /**
  * @swagger
  * tags:
- *   name: Posts
- *   description: The Posts API
- */
-
-/**
- * @swagger
+ *   - name: Posts
+ *     description: The Posts API
+ *
  * components:
  *   securitySchemes:
  *     bearerAuth:
  *       type: http
  *       scheme: bearer
  *       bearerFormat: JWT
- */
-
-/**
- * @swagger
- * components:
+ *
  *   schemas:
  *     Post:
  *       type: object
@@ -37,9 +30,14 @@ import upload from "../multer.config";
  *         senderId:
  *           type: string
  *           description: The ID of the user who created the post
+ *         image:
+ *           type: string
+ *           format: binary
+ *           description: (Optional) Image file associated with the post
  *       example:
- *         postData: 'This is a post content'
- *         senderId: '12345'
+ *         postData: "This is a post content"
+ *         senderId: "12345"
+ *         image: "image.jpg"
  */
 
 /**
@@ -57,22 +55,24 @@ import upload from "../multer.config";
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Post'
+ *       500:
+ *         description: Server error.
  */
 router.get("/", postsController.getAllPosts);
 
 /**
  * @swagger
- * /posts/filter:
+ * /posts/user/{userId}:
  *   get:
- *     summary: Get posts by sender ID
+ *     summary: Get all posts by a specific user
  *     tags: [Posts]
  *     parameters:
- *       - in: query
- *         name: senderId
+ *       - in: path
+ *         name: userId
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
- *         description: The ID of the user who created the post
+ *         description: The ID of the user whose posts are retrieved
  *     responses:
  *       200:
  *         description: List of posts by sender ID
@@ -83,7 +83,9 @@ router.get("/", postsController.getAllPosts);
  *               items:
  *                 $ref: '#/components/schemas/Post'
  *       404:
- *         description: Posts not found
+ *         description: No posts found for the given user.
+ *       500:
+ *         description: Server error.
  */
 router.get("/user/:userId", async (req, res, next) => {
   try {
@@ -104,7 +106,7 @@ router.get("/user/:userId", async (req, res, next) => {
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             $ref: '#/components/schemas/Post'
  *     responses:
@@ -114,6 +116,10 @@ router.get("/user/:userId", async (req, res, next) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Post'
+ *       401:
+ *         description: Unauthorized. Missing or invalid token.
+ *       500:
+ *         description: Server error.
  */
 router.post(
   "/",
@@ -125,16 +131,15 @@ router.post(
 /**
  * @swagger
  * /posts/{id}:
- *
  *   get:
  *     summary: Get a post by ID
  *     tags: [Posts]
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
  *         description: The post ID
  *     responses:
  *       200:
@@ -144,7 +149,9 @@ router.post(
  *             schema:
  *               $ref: '#/components/schemas/Post'
  *       404:
- *         description: Post not found
+ *         description: Post not found.
+ *       500:
+ *         description: Server error.
  */
 router.get("/:id", postsController.getPostById);
 
@@ -198,28 +205,104 @@ router.delete("/:id", authMiddleware, postsController.deletePostById);
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: string
+ *         description: The ID of the post to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             $ref: '#/components/schemas/Post'
+ *     responses:
+ *       200:
+ *         description: Post updated successfully.
+ *       404:
+ *         description: Post not found.
+ *       500:
+ *         description: Server error.
+ */
+router.put("/:id", authMiddleware, upload.single("image"), (req, res) => {
+  postsController.updatePostById(req, res);
+});
+
+/**
+ * @swagger
+ * /posts/like/{postId}:
+ *   put:
+ *     summary: Like a post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
  *         required: true
- *         description: Updated post ID
+ *         schema:
+ *           type: string
+ *         description: The ID of the post to like
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Post'
+ *             type: object
+ *             required:
+ *               - userId
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: The ID of the user liking the post
+ *             example:
+ *               userId: "123456789abcdef"
  *     responses:
  *       200:
- *         description: Post updated successfully
+ *         description: Post liked successfully.
  *       404:
- *         description: Post not found
+ *         description: Post not found.
+ *       500:
+ *         description: Server error.
  */
-
-router.put("/:id", authMiddleware, upload.single("image"), (req, res) => {
-  postsController.updatePostById(req, res);
-});
-
 router.put("/like/:postId", authMiddleware, postsController.addLike);
+
+/**
+ * @swagger
+ * /posts/unlike/{postId}:
+ *   put:
+ *     summary: Unlike a post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the post to unlike
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: The ID of the user unliking the post
+ *             example:
+ *               userId: "123456789abcdef"
+ *     responses:
+ *       200:
+ *         description: Post unliked successfully.
+ *       404:
+ *         description: Post not found.
+ *       500:
+ *         description: Server error.
+ */
 router.put("/unlike/:postId", authMiddleware, postsController.removeLike);
 
 export default router;

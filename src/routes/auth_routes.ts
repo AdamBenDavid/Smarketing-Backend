@@ -230,6 +230,25 @@ router.post("/refresh", authController.refresh);
  */
 router.post("/logout", authController.logout);
 
+/**
+ * @swagger
+ * /auth/profile/{id}:
+ *   put:
+ *     summary: Update user profile
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The user ID
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ */
 router.put(
   "/profile/:id",
   authMiddleware,
@@ -237,8 +256,44 @@ router.put(
   authController.updateProfile
 );
 
+/**
+ * @swagger
+ * /auth/profile/{id}:
+ *   get:
+ *     summary: Get user profile by ID
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The user ID
+ *     responses:
+ *       200:
+ *         description: Returns user profile
+ */
 router.get("/profile/:id", authMiddleware, authController.getUserById);
 
-router.get('/user/:id', authController.getUserById);
+/**
+ * @swagger
+ * /auth/user/{id}:
+ *   get:
+ *     summary: Get user details by ID
+ *     tags: [Auth]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The user ID
+ *     responses:
+ *       200:
+ *         description: Returns user details
+ */
+router.get("/user/:id", authController.getUserById);
 
 export default router;
