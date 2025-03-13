@@ -4,6 +4,7 @@ import multer from "multer";
 
 ("../modules/user_modules");
 import { Request, Response } from "express";
+import commentsModel from "../modules/comments_modules";
 
 const addPost = async (req: Request, res: Response) => {
   try {
@@ -33,24 +34,41 @@ const addPost = async (req: Request, res: Response) => {
 
 const getAllPosts = async (req: Request, res: Response) => {
   try {
-    const posts = await postModel.find();
-    res.send(posts);
+    const posts = await postModel.find().populate("comments");
+
+    // Fetch comments for each post safely
+    const postsWithComments = await Promise.all(
+      posts.map(async (post) => {
+        if (!post) return {};
+
+        const comments = await commentsModel.find({ postId: post._id });
+        return { ...post.toObject(), comments };
+      })
+    );
+
+    res
+      .status(200)
+      .json(postsWithComments.filter((p) => Object.keys(p).length > 0));
   } catch (error) {
-    res.status(400).send(error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
 const getPostById = async (req: Request, res: Response) => {
   const postId = req.params.id;
+
   try {
-    const post = await postModel.findById(postId);
-    if (post != null) {
-      res.status(200).json(post);
-    } else {
-      res.status(400).send("post not found");
+    const post = await postModel.findById(postId).populate("comments");
+    if (!post) {
+      res.status(404).json({ error: "Post not found" });
+      return;
     }
+
+    const comments = await commentsModel.find({ postId });
+
+    res.status(200).json({ ...post.toObject(), comments });
   } catch (error) {
-    res.status(400).send(error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
