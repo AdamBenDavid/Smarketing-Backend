@@ -91,12 +91,14 @@ const generateToken = async (user: Document & User) => {
 
 const register = async (req: Request, res: Response) => {
   try {
-    const password = req.body.password;
+    const { email, password, fullName } = req.body;
+
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
+
     const user = await userModel.create({
-      email: req.body.email,
-      fullName: req.body.fullName,
+      email: email,
+      fullName: fullName,
       password: hashedPassword,
     });
     res.status(200).send(user);
@@ -305,7 +307,10 @@ export const authMiddleware = (
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.TOKEN_SECRET) as { _id: string, random: string };
+    const decoded = jwt.verify(token, process.env.TOKEN_SECRET) as {
+      _id: string;
+      random: string;
+    };
     req.params.userId = decoded._id;
     next();
   } catch (err) {

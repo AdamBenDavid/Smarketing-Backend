@@ -219,8 +219,7 @@ router.put("/:id", authMiddleware, upload.single("image"), (req, res) => {
   postsController.updatePostById(req, res);
 });
 
-router.put("/like/:id", authMiddleware, (req, res) => {
-  postsController.addLike(req, res);
-});
+router.put("/like/:postId", authMiddleware, postsController.addLike);
+router.put("/unlike/:postId", authMiddleware, postsController.removeLike);
 
 export default router;
