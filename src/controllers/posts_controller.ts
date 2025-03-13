@@ -162,6 +162,11 @@ const addLike = async (req: Request, res: Response): Promise<void> => {
   const { postId } = req.params;
   const { userId } = req.body;
 
+  if (!userId) {
+    res.status(400).json({ message: "User ID is required" });
+    return;
+  }
+
   console.log("🔹 postId:", postId);
   console.log("🔹 userId:", userId);
 
