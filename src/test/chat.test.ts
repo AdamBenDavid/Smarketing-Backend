@@ -4,7 +4,6 @@ import mongoose from "mongoose";
 import chatMessageModel from "../modules/chat_modules";
 import userModel from "../modules/user_modules";
 import { Express } from "express";
-import userSchema, { User } from "../modules/user_modules";
 import jwt from "jsonwebtoken";
 
 let app: Express;
@@ -45,6 +44,9 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  chatMessageModel.deleteMany();
+  userModel.deleteMany();
+
   await mongoose.connection.close();
 });
 

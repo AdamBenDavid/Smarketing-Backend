@@ -14,7 +14,6 @@ let userToken: string;
 beforeAll(async () => {
   app = await initApp();
   await postModel.deleteMany();
-
   await userModel.deleteMany();
 
   testUser = await userModel.create({
@@ -34,6 +33,8 @@ beforeAll(async () => {
 });
 
 afterAll((done) => {
+  postModel.deleteMany();
+  userModel.deleteMany();
   mongoose.connection.close();
   done();
 });
