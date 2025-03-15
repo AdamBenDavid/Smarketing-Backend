@@ -30,6 +30,7 @@ beforeAll(async () => {
 });
 
 afterAll((done) => {
+  userModel.deleteMany();
   mongoose.connection.close();
   done();
 });

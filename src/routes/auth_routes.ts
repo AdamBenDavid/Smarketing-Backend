@@ -296,4 +296,22 @@ router.get("/profile/:id", authMiddleware, authController.getUserById);
  */
 router.get("/user/:id", authController.getUserById);
 
+//route to check middleware
+/**
+ * @swagger
+ * /protected-route:
+ *   get:
+ *     summary: Example protected route
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully accessed protected route
+ *       401:
+ *         description: Access Denied
+ */
+router.get("/protected-route", authMiddleware, (req, res) => {
+  res.status(200).send("You have access!");
+});
+
 export default router;

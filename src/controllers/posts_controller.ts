@@ -9,10 +9,10 @@ import commentsModel from "../modules/comments_modules";
 const addPost = async (req: Request, res: Response) => {
   try {
     const { postData, senderId } = req.body;
-    console.log("backend postData " + postData);
-    console.log("backend senderId " + senderId);
+    console.log("add post postData " + postData + "senderId " + senderId);
     if (!senderId) {
       res.status(400).json({ error: "Sender ID is required" });
+      return;
     }
 
     const image = req.file ? `uploads/post_images/${req.file.filename}` : null;
@@ -26,9 +26,9 @@ const addPost = async (req: Request, res: Response) => {
       sender: senderId,
       image: image ? `http://localhost:3000/${image}` : null,
     });
+    return;
   } catch (error) {
-    console.log("error " + error);
-    res.status(400).json({ error: (error as Error).message });
+    res.status(500).json({ error: (error as Error).message });
   }
 };
 
@@ -58,6 +58,7 @@ const getPostById = async (req: Request, res: Response) => {
   const postId = req.params.id;
 
   try {
+
     const post = await postModel.findById(postId).populate("comments");
     if (!post) {
       res.status(404).json({ error: "Post not found" });
@@ -72,50 +73,21 @@ const getPostById = async (req: Request, res: Response) => {
   }
 };
 
-const deletePosts = async (req: Request, res: Response) => {
-  try {
-    const posts = await postModel.deleteMany();
-    res.send(posts);
-  } catch (error) {
-    res.status(400).send(error);
-  }
-};
-
-const deletePostById = async (req: Request, res: Response) => {
-  console.log("delete post by id");
-  const postId = req.params.id;
-  try {
-    const deletedPost = await postModel.findByIdAndDelete(postId);
-    if (!deletedPost) {
-      res.status(404).json({ message: "Post not found" });
-    }
-    res.status(200).json({ message: "Post deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
 const upload = multer({ dest: "uploads/post_images" });
 
 const updatePostById = async (req: Request, res: Response) => {
   const postId = req.params.id;
-  console.log("postId " + postId);
-
   const { postData } = req.body;
-  console.log("backend postData " + postData);
 
   try {
-    // קבלת הפוסט מה-DB כדי לבדוק אם יש תמונה קיימת
     const existingPost = await postModel.findById(postId);
     if (!existingPost) {
       return res.status(404).json({ error: "Post not found" });
     }
 
-    // שמירת הנתיב הקיים של התמונה אם לא הועלה קובץ חדש
     const image = req.file
       ? `uploads/post_images/${req.file.filename}`
       : existingPost.image;
-    console.log("backend image " + image);
 
     // עדכון הפוסט
     const updatedPost = await postModel.findByIdAndUpdate(
@@ -129,6 +101,7 @@ const updatePostById = async (req: Request, res: Response) => {
     }
 
     res.status(200).json(updatedPost);
+    return;
   } catch (error) {
     res.status(400).json({ error: (error as Error).message });
   }
@@ -151,6 +124,7 @@ const getPostBySenderId = async (req: Request, res: Response) => {
     }
 
     res.status(200).json(posts);
+    return;
   } catch (err) {
     res.status(500).json({ error: "Internal Server Error" });
   }
@@ -214,8 +188,34 @@ const removeLike = async (req: Request, res: Response): Promise<void> => {
 
     await post.save();
     res.status(200).json({ message: "Like removed", likes: post.likes.length });
+    return;
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
+  }
+};
+
+const deletePosts = async (req: Request, res: Response) => {
+  try {
+    const posts = await postModel.deleteMany();
+    res.send(posts);
+    return;
+  } catch (error) {
+    res.status(400).send(error);
+  }
+};
+
+const deletePostById = async (req: Request, res: Response) => {
+  const postId = req.params.id;
+  try {
+    const deletedPost = await postModel.findByIdAndDelete(postId);
+    if (!deletedPost) {
+      res.status(404).json({ message: "Post not found" });
+      return;
+    }
+    res.status(200).json({ message: "Post deleted successfully" });
+    return;
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 

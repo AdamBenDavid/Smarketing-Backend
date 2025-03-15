@@ -6,7 +6,7 @@ export interface User {
   password: string;
   fullName: string;
   refreshToken?: string[];
-  profilePicture?: string;
+  profilePicture?: string | null;
   role?: string;
 }
 
@@ -26,8 +26,8 @@ const userSchema = new mongoose.Schema<User>({
   },
   role: {
     type: String,
-    default: 'user',
-    enum: ['user', 'expert', 'admin']
+    default: "user",
+    enum: ["user", "expert", "admin"],
   },
   refreshToken: {
     type: [String],

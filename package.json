@@ -13,8 +13,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.8.1",
     "multer": "^1.4.5-lts.1",
-    "socket.io": "^4.8.1",
     "sharp": "^0.33.5",
+    "socket.io": "^4.8.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
   },
@@ -43,6 +43,11 @@
   "scripts": {
     "nodemon": "nodemon server.js",
     "test": "cp .env_test .env && tsc && jest --detectOpenHandles --forceExit --verbose",
+    "test:auth": "jest src/test/auth.test.ts --detectOpenHandles --forceExit --verbose",
+    "test:chat": "jest src/test/chat.test.ts --detectOpenHandles --forceExit --verbose",
+    "test:posts": "jest src/test/posts.test.ts --detectOpenHandles --forceExit --verbose",
+    "test:users": "jest src/test/users.test.ts --detectOpenHandles --forceExit --verbose",
+
     "dev": "copy .env_dev .env && nodemon ./src/app.ts",
     "lint": "eslint . --ext .ts",
     "test:coverage": "jest --coverage"

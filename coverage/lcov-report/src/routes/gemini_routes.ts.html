@@ -1,0 +1,307 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Code coverage report for src/routes/gemini_routes.ts</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="../../favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+    
+<body>
+<div class='wrapper'>
+    <div class='pad1'>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/routes</a> gemini_routes.ts</h1>
+        <div class='clearfix'>
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Statements</span>
+                <span class='fraction'>5/5</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>0/0</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>0/0</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Lines</span>
+                <span class='fraction'>5/5</span>
+            </div>
+        
+            
+        </div>
+        <p class="quiet">
+            Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+        </p>
+        <template id="filterTemplate">
+            <div class="quiet">
+                Filter:
+                <input type="search" id="fileSearch">
+            </div>
+        </template>
+    </div>
+    <div class='status-line high'></div>
+    <pre><table class="coverage">
+<tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
+<a name='L2'></a><a href='#L2'>2</a>
+<a name='L3'></a><a href='#L3'>3</a>
+<a name='L4'></a><a href='#L4'>4</a>
+<a name='L5'></a><a href='#L5'>5</a>
+<a name='L6'></a><a href='#L6'>6</a>
+<a name='L7'></a><a href='#L7'>7</a>
+<a name='L8'></a><a href='#L8'>8</a>
+<a name='L9'></a><a href='#L9'>9</a>
+<a name='L10'></a><a href='#L10'>10</a>
+<a name='L11'></a><a href='#L11'>11</a>
+<a name='L12'></a><a href='#L12'>12</a>
+<a name='L13'></a><a href='#L13'>13</a>
+<a name='L14'></a><a href='#L14'>14</a>
+<a name='L15'></a><a href='#L15'>15</a>
+<a name='L16'></a><a href='#L16'>16</a>
+<a name='L17'></a><a href='#L17'>17</a>
+<a name='L18'></a><a href='#L18'>18</a>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a>
+<a name='L41'></a><a href='#L41'>41</a>
+<a name='L42'></a><a href='#L42'>42</a>
+<a name='L43'></a><a href='#L43'>43</a>
+<a name='L44'></a><a href='#L44'>44</a>
+<a name='L45'></a><a href='#L45'>45</a>
+<a name='L46'></a><a href='#L46'>46</a>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a>
+<a name='L75'></a><a href='#L75'>75</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import express from "express";
+import multer from "multer";
+import { getGeminiImageDescription } from "../controllers/gemini_controller";
+&nbsp;
+const router = express.Router();
+&nbsp;
+/**
+ * @swagger
+ * tags:
+ *   - name: Gemini
+ *     description: API for image analysis using Gemini AI
+ *
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *
+ *   schemas:
+ *     GeminiImageRequest:
+ *       type: object
+ *       required:
+ *         - base64Image
+ *       properties:
+ *         base64Image:
+ *           type: string
+ *           format: base64
+ *           description: The image encoded in Base64 format
+ *       example:
+ *         base64Image: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEBLAEsAAD/4QBWRXhpZgAATU0AKgAAAAgABAEaAAUAAAABAAAAPgEbAAUAAAABAAAARgEoAAMAAAABAAIAAAITAAMAAAABAAEAAAAAAAAAAAEsAAAAAQAAASwAAAAB/+0ALFBob3Rvc2hvcCAzLjAAOEJJTQQEAAAAAAAPHAFaAAMbJUccAQAAAgAEAP/hDIFodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvADw/eHBhY2tldCBiZWdpbj0n77u/JyBpZD0nVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkJz8+Cjx4OnhtcG1ldGEgeG1sbnM6eD0nYWRvYmU6bnM6bWV0YS8nIHg6eG1wdGs9J0ltYWdlOjpFeGlmVG9vbCAxMC4xMCc+CjxyZGY6UkRGIHhtbG5zOnJkZj0naHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyc+CgogPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9JycKICB4bWxuczp0aWZmPSdodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyc+CiAgPHRpZmY6UmVzb2x1dGlvblVuaXQ+MjwvdGlmZjpSZXNvbHV0aW9uVW5pdD4KICA8dGlmZjpYUmVzb2x1dGlvbj4zMDAvMTwvdGlmZjpYUmVzb2x1dGlvbj4KICA8dGlmZjpZUmVzb2x1dGlvbj4zMDAvMTwvdGlmZjpZUmVzb2x1dGlvbj4KIDwvcmRmOkRlc2NyaXB0aW9uPgoKIDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PScnCiAgeG1sbnM6eG1wTU09J2h0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8nPgogIDx4bXBNTTpEb2N1bWVudElEPmFkb2JlOmRvY2lkOnN0b2NrOjQ5ZDRhN2FlLTI1NjYtNDY5Yi05NmI5LWUxYzAxM2JiNmEwYzwveG1wTU06RG9jdW1lbnRJRD4KICA8eG1wTU06SW5zdGFuY2VJRD54bXAuaWlkOjUxYWY0OTY0LWE4MjQtNDk1Yy04MzgzLTQ3OTYxMzNjMzY2YjwveG1wTU06SW5zdGFuY2VJRD4KIDwvcmRmOkRlc2NyaXB0aW9uPgo8L3JkZjpSREY+CjwveDp4bXBtZXRhPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAo8P3hwYWNrZXQgZW5kPSd3Jz8+/9sAQwAFAwQEBAMFBAQEBQUFBgcMCAcHBwcPCwsJDBEPEhIRDxERExYcFxMUGhURERghGBodHR8fHxMXIiQiHiQcHh8e/8AACwgBaAFoAQERAP/EABsAAQADAQEBAQAAAAAAAAAAAAAFBgcEAgMB/8QAPhABAAEDAgIECA0EAgMAAAAAAAECAwQFBhEhEjFBUQcTNmFzgbHRFSIkMkJSU2JxcpGhwRQjk+GC8RY0Vf/aAAgBAQAAPwDXQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA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"
+ *
+ *     GeminiImageResponse:
+ *       type: object
+ *       properties:
+ *         response:
+ *           type: string
+ *           description: The AI-generated description of the image
+ *       example:
+ *         response: "תמונה של חוף ים עם שקיעה מדהימה בשמיים"
+ */
+&nbsp;
+/**
+ * @swagger
+ * /gemini:
+ *   post:
+ *     summary: Analyze an image and get a description
+ *     tags: [Gemini]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/GeminiImageRequest'
+ *     responses:
+ *       200:
+ *         description: Successfully generated an image description
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/GeminiImageResponse'
+ *       400:
+ *         description: Bad request. Invalid or missing image data.
+ *       401:
+ *         description: Unauthorized. Missing or invalid token.
+ *       500:
+ *         description: Internal server error.
+ */
+&nbsp;
+router.post("/", express.json({ limit: "10mb" }), getGeminiImageDescription);
+&nbsp;
+export default router;
+&nbsp;</pre></td></tr></table></pre>
+
+                <div class='push'></div><!-- for sticky footer -->
+            </div><!-- /wrapper -->
+            <div class='footer quiet pad2 space-top1 center small'>
+                Code coverage generated by
+                <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+                at 2025-03-15T14:18:41.162Z
+            </div>
+        <script src="../../prettify.js"></script>
+        <script>
+            window.onload = function () {
+                prettyPrint();
+            };
+        </script>
+        <script src="../../sorter.js"></script>
+        <script src="../../block-navigation.js"></script>
+    </body>
+</html>
+    

@@ -12,15 +12,24 @@ const userSchema = new mongoose_1.default.Schema({
     },
     password: {
         type: String,
-        required: true,
+        required: true, //GENERATE RANDOM PASSWORD FOR GOOGLE SIGN IN
     },
     fullName: {
         type: String,
         required: false,
     },
+    role: {
+        type: String,
+        default: "user",
+        enum: ["user", "expert", "admin"],
+    },
     refreshToken: {
         type: [String],
         default: [],
+    },
+    profilePicture: {
+        type: String,
+        required: false,
     },
 });
 const userModel = mongoose_1.default.model("Users", userSchema);

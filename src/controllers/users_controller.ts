@@ -24,50 +24,6 @@ const getUserById = async (req: Request, res: Response) => {
   }
 };
 
-// Update Password by id
-const updatePasswordById = async (req: Request, res: Response) => {
-  const id = req.params.id;
-  const updatedData = req.body;
-
-  try {
-    const updatedUser = await userModel.findOneAndUpdate(
-      { _id: id },
-      updatedData,
-      {
-        new: true,
-      }
-    );
-    if (!updatedUser) {
-      return res.status(404).send("User not found");
-    }
-    res.status(200).send(updatedUser);
-  } catch (error) {
-    res.status(400);
-  }
-};
-
-// Update full name by id
-const updateFullNameById = async (req: Request, res: Response) => {
-  const id = req.params.id;
-  const updatedData = req.body;
-
-  try {
-    const updatedUser = await userModel.findOneAndUpdate(
-      { _id: id },
-      updatedData,
-      {
-        new: true,
-      }
-    );
-    if (!updatedUser) {
-      return res.status(404).send("User not found");
-    }
-    res.status(200).send(updatedUser);
-  } catch (error) {
-    res.status(400).send(error);
-  }
-};
-
 // Delete user by id
 const deleteUserById = async (req: Request, res: Response) => {
   const id = req.params.id;
@@ -96,8 +52,6 @@ const getAllUsers = async (req: Request, res: Response) => {
 export default {
   createUser,
   getUserById,
-  updatePasswordById,
-  updateFullNameById: updateFullNameById,
   deleteUserById,
   getAllUsers,
 };

@@ -8,6 +8,10 @@ import { OAuth2Client } from "google-auth-library";
 import crypto from "crypto";
 import fs from "fs";
 import path from "path";
+import mongoose from "mongoose";
+
+import dotenv from "dotenv";
+dotenv.config();
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -92,6 +96,12 @@ const generateToken = async (user: Document & User) => {
 const register = async (req: Request, res: Response) => {
   try {
     const { email, password, fullName } = req.body;
+    console.log("registering user:", email, password, fullName);
+
+    if (!email || !password || !fullName) {
+      res.status(400).send("Missing required fields");
+      return;
+    }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -100,6 +110,7 @@ const register = async (req: Request, res: Response) => {
       email: email,
       fullName: fullName,
       password: hashedPassword,
+      profilePicture: null,
     });
     res.status(200).send(user);
   } catch (err) {
@@ -143,19 +154,30 @@ const createToken = (userId: string): Tokens | null => {
 
 const login = async (req: Request, res: Response) => {
   try {
-    const user = await userModel.findOne({ email: req.body.email });
-    if (!user) {
-      res.status(400).send("wrong name or password");
+    if (!req.body.email) {
+      res.status(400).send("wrong email or password");
       return;
     }
+    const user = await userModel.findOne({ email: req.body.email });
+    if (!user) {
+      res.status(400).send("wrong email or password");
+      return;
+    }
+
+    if (!req.body.password) {
+      res.status(400).send("wrong email or password");
+      return;
+    }
+
     const validPassword = await bcrypt.compare(
       req.body.password,
       user.password
     );
     if (!validPassword) {
-      res.status(400).send("wrong name or password");
+      res.status(400).send("wrong email or password");
       return;
     }
+
     if (!process.env.TOKEN_SECRET) {
       res.status(500).send("Server Error");
       return;
@@ -163,7 +185,7 @@ const login = async (req: Request, res: Response) => {
     // generate token
     const tokens = createToken(user._id);
     if (!tokens) {
-      res.status(500).send("Server Error");
+      res.status(500).send("Server Error: Failed to generate tokens");
       return;
     }
     if (!user.refreshToken) {
@@ -181,7 +203,7 @@ const login = async (req: Request, res: Response) => {
         : null,
     });
   } catch (err) {
-    res.status(400).send(err);
+    res.status(400).send("Server Error: Unexpected error occurred");
   }
 };
 
@@ -195,50 +217,123 @@ type tUser = Document<unknown, {}, User> &
     __v: number;
   };
 
+// const verifyRefreshToken = (refreshToken: string | undefined) => {
+//   return new Promise<tUser>((resolve, reject) => {
+//     if (!refreshToken) {
+//       reject("fail");
+//       return;
+//     }
+//     if (!process.env.TOKEN_SECRET) {
+//       reject("fail");
+//       return;
+//     }
+
+//     jwt.verify(
+//       refreshToken,
+//       process.env.TOKEN_SECRET,
+//       async (err: any, payload: any) => {
+//         if (err) {
+//           reject("fail");
+//           return;
+//         }
+
+//         const userId = payload._id;
+//         try {
+//           const user = await userModel.findById(userId);
+//           if (!user) {
+//             reject("fail");
+//             return;
+//           }
+
+//           console.log(
+//             "🔹 Before removing old refreshToken:",
+//             user.refreshToken
+//           );
+
+//           // **🔥 מחיקת הישן ושמירת הרשימה המעודכנת 🔥**
+//           user.refreshToken = user.refreshToken?.filter(
+//             (token) => token !== refreshToken
+//           );
+//           await user.save();
+
+//           console.log("✅ After removing old refreshToken:", user.refreshToken);
+
+//           resolve(user);
+//         } catch (err) {
+//           reject("fail");
+//           return;
+//         }
+//       }
+//     );
+//   });
+// };
+
 const verifyRefreshToken = (refreshToken: string | undefined) => {
-  return new Promise<tUser>((resolve, reject) => {
-    //get refresh token from body
+  return new Promise<tUser>(async (resolve, reject) => {
+    console.log("🔹 Verifying refresh token:", refreshToken);
+
     if (!refreshToken) {
+      console.log("❌ No refresh token provided");
       reject("fail");
       return;
     }
-    //verify token
+
     if (!process.env.TOKEN_SECRET) {
+      console.log("❌ Missing TOKEN_SECRET");
       reject("fail");
       return;
     }
+
     jwt.verify(
       refreshToken,
       process.env.TOKEN_SECRET,
       async (err: any, payload: any) => {
         if (err) {
+          console.error("❌ Invalid refresh token:", err);
           reject("fail");
           return;
         }
-        //get the user id fromn token
+
+        console.log("✅ Refresh token decoded, user ID:", payload._id);
         const userId = payload._id;
+
         try {
-          //get the user form the db
           const user = await userModel.findById(userId);
           if (!user) {
+            console.log("❌ User not found for refresh token");
             reject("fail");
             return;
           }
+
+          console.log("🔹 User found:", user.email);
+          console.log(
+            "🔹 Stored refresh tokens before check:",
+            user.refreshToken
+          );
+
           if (!user.refreshToken || !user.refreshToken.includes(refreshToken)) {
-            user.refreshToken = [];
-            await user.save();
-            reject("fail");
+            console.log("❌ Refresh token not found in user record!");
+            reject("check fail"); // ✅ מחזירים הודעה ברורה במקום לזרוק שגיאה כללית
             return;
           }
-          const tokens = user.refreshToken!.filter(
+
+          console.log("✅ Refresh token found in user record.");
+
+          // 🔹 מסירים את הטוקן הישן
+          user.refreshToken = user.refreshToken.filter(
             (token) => token !== refreshToken
           );
-          user.refreshToken = tokens;
+          await user.save();
+
+          console.log(
+            "✅ Old refresh token removed, remaining tokens:",
+            user.refreshToken
+          );
 
           resolve(user);
         } catch (err) {
+          console.error("❌ Database error:", err);
           reject("fail");
-          return;
         }
       }
     );
@@ -247,7 +342,10 @@ const verifyRefreshToken = (refreshToken: string | undefined) => {
 
 const logout = async (req: Request, res: Response) => {
   try {
+    console.log("logout " + req.body.refreshToken);
     const user = await verifyRefreshToken(req.body.refreshToken);
+
+    console.log("logout user:", user);
 
     await user.save();
     res.status(200).send("success");
@@ -258,30 +356,51 @@ const logout = async (req: Request, res: Response) => {
 
 const refresh = async (req: Request, res: Response) => {
   try {
-    const user = await verifyRefreshToken(req.body.refreshToken);
-    if (!user) {
-      res.status(400).send("fail");
-      return;
-    }
-    const tokens = createToken(user._id);
+    console.log(
+      "🔹 Received refresh request with token:",
+      req.body.refreshToken
+    );
 
+    console.log("refresh" + req.body.refreshToken);
+    const user = await verifyRefreshToken(req.body.refreshToken).catch(
+      (err) => {
+        if (err === "check fail") {
+          console.log("❌ Double use of refresh token detected!");
+          res.status(400).send("check fail"); // ✅ שליחת שגיאה במקום להגיע ל- `catch`
+          return null;
+        }
+        throw err; // אם זו שגיאה אחרת, מעבירים אותה הלאה
+      }
+    );
+
+    if (!user) return; // ✅ אם כבר טיפלנו בשגיאה, אין צורך להמשיך
+
+    console.log("✅ Valid refresh token - Generating new tokens...");
+
+    const tokens = createToken(user._id);
     if (!tokens) {
+      console.log("❌ Failed to generate tokens");
       res.status(500).send("Server Error");
       return;
     }
+
+    console.log("🔹 Adding new refresh token to user's list...");
     if (!user.refreshToken) {
       user.refreshToken = [];
     }
     user.refreshToken.push(tokens.refreshToken);
     await user.save();
+
+    console.log("✅ Successfully issued new tokens:", tokens);
+
     res.status(200).send({
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
       _id: user._id,
     });
-    //send new token
   } catch (err) {
-    res.status(400).send("fail");
+    console.error("❌ Error in refresh route:", err);
+    res.status(500).send("Internal Server Error");
   }
 };
 
@@ -296,6 +415,8 @@ export const authMiddleware = (
 ) => {
   const authorization = req.header("authorization");
   const token = authorization && authorization.split(" ")[1];
+
+  console.log("🔹 Authorization token:", token);
 
   if (!token) {
     res.status(401).send("Access Denied");
@@ -323,14 +444,22 @@ const updateProfile = async (req: Request, res: Response): Promise<void> => {
   try {
     log("Updating profile...");
     const userId = req.params.id;
-    const { fullName } = req.body;
-    const file = req.file;
+    console.log("update profile userId:", userId);
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      res.status(400).send({ message: "Invalid user ID" });
+      return;
+    }
 
     const user = await userModel.findById(userId);
+    console.log("update profile user:", user);
+
     if (!user) {
       res.status(404).send({ message: "User not found" });
       return;
     }
+
+    const { fullName } = req.body;
+    const file = req.file;
 
     if (file) {
       const uploadsDir = path.join(
@@ -370,7 +499,7 @@ const updateProfile = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (err) {
     console.error("Profile Update Error:", err);
-    res.status(500).send({ message: "Server error" });
+    res.status(500).send({ message: "Server error" + err });
   }
 };
 
@@ -398,5 +527,7 @@ export default {
   logout,
   googleSignin,
   updateProfile,
+  generateToken,
   getUserById,
+  createToken,
 };

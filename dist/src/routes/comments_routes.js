@@ -10,26 +10,16 @@ const auth_controller_1 = require("../controllers/auth_controller");
 /**
  * @swagger
  * tags:
- *   name: Comments
- *   description: The Comments API
- */
-/**
- * @swagger
+ *   - name: Comments
+ *     description: The Comments API
+ *
  * components:
  *   securitySchemes:
  *     bearerAuth:
  *       type: http
  *       scheme: bearer
  *       bearerFormat: JWT
- */
-/**
- * @swagger
- * components:
- *   securitySchemes:
- *     bearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
+ *
  *   schemas:
  *     Comment:
  *       type: object
@@ -40,17 +30,17 @@ const auth_controller_1 = require("../controllers/auth_controller");
  *       properties:
  *         userId:
  *           type: string
- *           description: The user id
+ *           description: The user ID of the commenter
  *         commentData:
  *           type: string
  *           description: The content of the comment
  *         postId:
  *           type: string
- *           description: The ID of the post
+ *           description: The ID of the post associated with the comment
  *       example:
- *         userId: '12345'
- *         commentData: 'This is a comment'
- *         postId: '67890'
+ *         userId: "12345"
+ *         commentData: "This is a comment"
+ *         postId: "67890"
  */
 /**
  * @swagger
@@ -59,7 +49,7 @@ const auth_controller_1 = require("../controllers/auth_controller");
  *     summary: Add a new comment
  *     tags: [Comments]
  *     security:
- *       - bearerAuth: [] # שימוש באבטחה
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -67,12 +57,14 @@ const auth_controller_1 = require("../controllers/auth_controller");
  *           schema:
  *             $ref: '#/components/schemas/Comment'
  *     responses:
- *       200:
+ *       201:
  *         description: The created comment
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Comment'
+ *       400:
+ *         description: Bad request. Missing or invalid data.
  *       401:
  *         description: Unauthorized. Missing or invalid token.
  *       500:
@@ -94,6 +86,8 @@ router.post("/", auth_controller_1.authMiddleware, comments_controller_1.default
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Comment'
+ *       500:
+ *         description: Internal server error.
  */
 router.get("/", comments_controller_1.default.getAllComments);
 /**
@@ -108,7 +102,7 @@ router.get("/", comments_controller_1.default.getAllComments);
  *         schema:
  *           type: string
  *         required: true
- *         description: The comment ID
+ *         description: The ID of the comment to update
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -125,7 +119,9 @@ router.get("/", comments_controller_1.default.getAllComments);
  *             schema:
  *               $ref: '#/components/schemas/Comment'
  *       400:
- *         description: Missing required parameters or invalid request body.
+ *         description: Bad request. Missing required parameters or invalid data.
+ *       401:
+ *         description: Unauthorized. Missing or invalid token.
  *       404:
  *         description: Comment not found.
  *       500:
@@ -134,7 +130,6 @@ router.get("/", comments_controller_1.default.getAllComments);
 router.put("/:id", auth_controller_1.authMiddleware, (req, res) => {
     comments_controller_1.default.updateCommentById(req, res);
 });
-router.get("/:id", comments_controller_1.default.getCommentById);
 /**
  * @swagger
  * /comments/{id}:
@@ -147,7 +142,7 @@ router.get("/:id", comments_controller_1.default.getCommentById);
  *         schema:
  *           type: string
  *         required: true
- *         description: The comment ID
+ *         description: The ID of the comment to retrieve
  *     responses:
  *       200:
  *         description: The requested comment
@@ -155,6 +150,10 @@ router.get("/:id", comments_controller_1.default.getCommentById);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Comment'
+ *       404:
+ *         description: Comment not found.
+ *       500:
+ *         description: Internal server error.
  */
 router.get("/:id", comments_controller_1.default.getCommentById);
 /**
@@ -169,18 +168,12 @@ router.get("/:id", comments_controller_1.default.getCommentById);
  *         schema:
  *           type: string
  *         required: true
- *         description: The comment ID to delete
+ *         description: The ID of the comment to delete
  *     security:
- *       - bearerAuth: [] # דורש הרשאה עם Bearer Token
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Successfully deleted the comment
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Comment'
- *       400:
- *         description: Bad request. The provided ID is invalid or missing.
  *         content:
  *           application/json:
  *             schema:
@@ -188,7 +181,12 @@ router.get("/:id", comments_controller_1.default.getCommentById);
  *               properties:
  *                 message:
  *                   type: string
- *                   description: Error details.
+ *                   description: Success message
+ *                   example: "Comment deleted successfully"
+ *       400:
+ *         description: Bad request. The provided ID is invalid or missing.
+ *       401:
+ *         description: Unauthorized. Missing or invalid token.
  *       404:
  *         description: Comment not found.
  *       500:
