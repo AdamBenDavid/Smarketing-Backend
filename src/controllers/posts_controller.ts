@@ -34,21 +34,21 @@ const addPost = async (req: Request, res: Response) => {
 
 const getAllPosts = async (req: Request, res: Response) => {
   try {
-    const posts = await postModel.find().populate("comments");
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 6;
+    const skip = (page - 1) * limit;
 
-    // Fetch comments for each post safely
-    const postsWithComments = await Promise.all(
-      posts.map(async (post) => {
-        if (!post) return {};
+    const posts = await postModel
+      .find()
+      .populate("comments")
+      .skip(skip)
+      .limit(limit);
+    const totalPosts = await postModel.countDocuments();
 
-        const comments = await commentsModel.find({ postId: post._id });
-        return { ...post.toObject(), comments };
-      })
-    );
-
-    res
-      .status(200)
-      .json(postsWithComments.filter((p) => Object.keys(p).length > 0));
+    res.status(200).json({
+      posts,
+      hasMore: page * limit < totalPosts,
+    });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
