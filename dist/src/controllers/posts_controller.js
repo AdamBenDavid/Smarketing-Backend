@@ -13,29 +13,36 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const post_modules_1 = __importDefault(require("../modules/post_modules"));
+const multer_1 = __importDefault(require("multer"));
+("../modules/user_modules");
 const addPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("add post");
     try {
         const { postData, senderId } = req.body;
-        const image = req.file ? `/uploads/${req.file.filename}` : null;
-        const post = new post_modules_1.default({
-            postData,
-            senderId,
-            image,
-        });
+        console.log("add post postData " + postData + "senderId " + senderId);
+        if (!senderId) {
+            res.status(400).json({ error: "Sender ID is required" });
+            return;
+        }
+        const image = req.file ? `uploads/post_images/${req.file.filename}` : null;
+        const post = new post_modules_1.default({ postData, senderId, image });
         yield post.save();
-        res.status(201).json(post);
+        res.status(201).json({
+            _id: post._id,
+            postData: post.postData,
+            sender: senderId,
+            image: image ? `http://localhost:3000/${image}` : null,
+        });
+        return;
     }
     catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(500).json({ error: error.message });
     }
 });
 const getAllPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log("get all posts");
         const posts = yield post_modules_1.default.find();
-        console.log("posts " + posts);
         res.send(posts);
+        return;
     }
     catch (error) {
         res.status(400).send(error);
@@ -47,33 +54,36 @@ const getPostById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         const post = yield post_modules_1.default.findById(postId);
         if (post != null) {
             res.status(200).json(post);
+            return;
         }
         else {
             res.status(400).send("post not found");
+            return;
         }
     }
     catch (error) {
         res.status(400).send(error);
     }
 });
-const deletePosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const posts = yield post_modules_1.default.deleteMany();
-        res.send(posts);
-    }
-    catch (error) {
-        res.status(400).send(error);
-    }
-});
+const upload = (0, multer_1.default)({ dest: "uploads/post_images" });
 const updatePostById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const postId = req.params.id;
-    const { postData, image } = req.body;
+    const { postData } = req.body;
     try {
+        const existingPost = yield post_modules_1.default.findById(postId);
+        if (!existingPost) {
+            return res.status(404).json({ error: "Post not found" });
+        }
+        const image = req.file
+            ? `uploads/post_images/${req.file.filename}`
+            : existingPost.image;
+        // עדכון הפוסט
         const updatedPost = yield post_modules_1.default.findByIdAndUpdate(postId, { postData, image }, { new: true });
         if (!updatedPost) {
-            return res.status(404).send("Post not found");
+            return res.status(404).json({ error: "Post not found" });
         }
         res.status(200).json(updatedPost);
+        return;
     }
     catch (error) {
         res.status(400).json({ error: error.message });
@@ -89,26 +99,90 @@ const getPostBySenderId = (req, res) => __awaiter(void 0, void 0, void 0, functi
     try {
         const posts = yield post_modules_1.default.find({ senderId: userId }); // Find posts by senderId
         if (posts.length === 0) {
-            return res.status(404).json({ message: "No posts found for this user" });
+            return res.status(200).json({ message: "No posts found for this user" });
         }
         res.status(200).json(posts);
+        return;
     }
     catch (err) {
-        console.error(" Error fetching user posts:", err);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
 const addLike = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const postId = req.params.id;
+    console.log("🔹 req.params:", JSON.stringify(req.params, null, 2));
+    const { postId } = req.params;
+    const { userId } = req.body;
+    if (!userId) {
+        res.status(400).json({ message: "User ID is required" });
+        return;
+    }
+    console.log("🔹 postId:", postId);
+    console.log("🔹 userId:", userId);
     try {
-        const updatedPost = yield post_modules_1.default.findByIdAndUpdate(postId, { $inc: { likes: 1 } }, { new: true });
-        if (!updatedPost) {
-            return res.status(404).json({ message: "Post not found" });
+        const post = yield post_modules_1.default.findById(postId);
+        if (!post) {
+            res.status(404).json({ message: "Post not found" });
+            return;
         }
-        res.status(200).json(updatedPost);
+        if (!Array.isArray(post.likes))
+            post.likes = [];
+        if (!post.likes.includes(userId)) {
+            post.likes.push(userId);
+            yield post.save();
+        }
+        res.status(200).json({ message: "Post liked", likes: post.likes.length });
     }
     catch (error) {
-        res.status(500).json({ message: "Internal Server Error", error });
+        res.status(500).json({ message: "Server error", error });
+    }
+});
+const removeLike = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { postId } = req.params;
+        const { userId } = req.body;
+        if (!userId) {
+            res.status(400).json({ message: "User ID is required" });
+            return;
+        }
+        const post = yield post_modules_1.default.findById(postId);
+        if (!post) {
+            res.status(404).json({ message: "Post not found" });
+            return;
+        }
+        if (!Array.isArray(post.likes))
+            post.likes = [];
+        post.likes = post.likes.filter((like) => like.toString() !== userId.toString());
+        yield post.save();
+        res.status(200).json({ message: "Like removed", likes: post.likes.length });
+        return;
+    }
+    catch (error) {
+        res.status(500).json({ message: "Server error", error });
+    }
+});
+const deletePosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const posts = yield post_modules_1.default.deleteMany();
+        res.send(posts);
+        return;
+    }
+    catch (error) {
+        res.status(400).send(error);
+    }
+});
+const deletePostById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const postId = req.params.id;
+    try {
+        const deletedPost = yield post_modules_1.default.findByIdAndDelete(postId);
+        if (!deletedPost) {
+            res.status(404).json({ message: "Post not found" });
+            return;
+        }
+        res.status(200).json({ message: "Post deleted successfully" });
+        return;
+    }
+    catch (error) {
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 exports.default = {
@@ -119,5 +193,7 @@ exports.default = {
     updatePostById,
     getPostBySenderId,
     addLike,
+    removeLike,
+    deletePostById,
 };
 //# sourceMappingURL=posts_controller.js.map

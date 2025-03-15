@@ -8,6 +8,10 @@ import { OAuth2Client } from "google-auth-library";
 import crypto from "crypto";
 import fs from "fs";
 import path from "path";
+import mongoose from "mongoose";
+
+import dotenv from "dotenv";
+dotenv.config();
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -100,6 +104,7 @@ const register = async (req: Request, res: Response) => {
       email: email,
       fullName: fullName,
       password: hashedPassword,
+      profilePicture: null,
     });
     res.status(200).send(user);
   } catch (err) {
@@ -148,6 +153,12 @@ const login = async (req: Request, res: Response) => {
       res.status(400).send("wrong name or password");
       return;
     }
+
+    if (!req.body.password) {
+      res.status(400).send("wrong name or password");
+      return;
+    }
+
     const validPassword = await bcrypt.compare(
       req.body.password,
       user.password
@@ -156,6 +167,8 @@ const login = async (req: Request, res: Response) => {
       res.status(400).send("wrong name or password");
       return;
     }
+
+    console.log("token secret:", process.env);
     if (!process.env.TOKEN_SECRET) {
       res.status(500).send("Server Error");
       return;
@@ -297,6 +310,8 @@ export const authMiddleware = (
   const authorization = req.header("authorization");
   const token = authorization && authorization.split(" ")[1];
 
+  console.log("🔹 Authorization token:", token);
+
   if (!token) {
     res.status(401).send("Access Denied");
     return;
@@ -323,14 +338,22 @@ const updateProfile = async (req: Request, res: Response): Promise<void> => {
   try {
     log("Updating profile...");
     const userId = req.params.id;
-    const { fullName } = req.body;
-    const file = req.file;
+    console.log("update profile userId:", userId);
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      res.status(400).send({ message: "Invalid user ID" });
+      return;
+    }
 
     const user = await userModel.findById(userId);
+    console.log("update profile user:", user);
+
     if (!user) {
       res.status(404).send({ message: "User not found" });
       return;
     }
+
+    const { fullName } = req.body;
+    const file = req.file;
 
     if (file) {
       const uploadsDir = path.join(
@@ -370,7 +393,7 @@ const updateProfile = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (err) {
     console.error("Profile Update Error:", err);
-    res.status(500).send({ message: "Server error" });
+    res.status(500).send({ message: "Server error" + err });
   }
 };
 
@@ -398,5 +421,7 @@ export default {
   logout,
   googleSignin,
   updateProfile,
+  generateToken,
   getUserById,
+  createToken,
 };
