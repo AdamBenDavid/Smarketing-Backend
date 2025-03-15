@@ -114,11 +114,21 @@ const deleteCommentById = async (req: Request, res: Response) => {
 
   try {
     const commentId = req.params.id;
-    const comment = await commentsModel.findByIdAndDelete(commentId);
+    const comment = await commentsModel.findById(commentId);
+
     if (!comment) {
-      return res.status(404).send("Comment not found");
+      return res.status(404).json({ error: "Comment not found" });
     }
-    res.status(200).json({ message: "Comment deleted successfully", comment });
+    const userId = req.params.userId;
+
+    if (comment.userId.toString() !== userId) {
+      return res
+        .status(403)
+        .json({ error: "Forbidden: You can only delete your own comments" });
+    }
+
+    await commentsModel.findByIdAndDelete(commentId);
+    res.status(200).json({ message: "Comment deleted successfully" });
   } catch (error) {
     console.error("Error deleting comment:", error);
     res.status(500).json({ error: "Internal Server Error" });
