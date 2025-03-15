@@ -1,10 +1,10 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import { User } from "./user_modules";
 
 export interface Post {
   senderId: String;
   postData: string;
-  comments?: Array<User>;
+  comments?: mongoose.Types.ObjectId[];
   image?: string;
   likes?: Array<User>;
 }
@@ -18,10 +18,12 @@ const postSchema = new mongoose.Schema<Post>({
     type: String,
     required: true,
   },
-  comments: {
-    type: Array,
-    required: false,
-  },
+  comments: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Comments",
+    },
+  ],
   image: {
     type: String,
     required: false,
