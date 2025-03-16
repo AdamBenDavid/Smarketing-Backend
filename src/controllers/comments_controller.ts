@@ -27,7 +27,9 @@ const addComment = async (req: Request, res: Response) => {
     const comment = new commentsModel({
       userId: user._id,
       fullName: user.fullName,
-      profilePicture: user.profilePicture || "https://i.pravatar.cc/50",
+      profilePicture:
+        user.profilePicture ||
+        "http://localhost:3000/images/default-profile.png",
       commentData,
       postId,
     });
