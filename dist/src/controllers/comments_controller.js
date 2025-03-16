@@ -75,26 +75,26 @@ const getCommentById = (req, res) => __awaiter(void 0, void 0, void 0, function*
         if (comment != null)
             res.send(comment);
         else
-            res.status(400).send("comment not found");
+            res.status(404).json({ error: "comment not found" });
     }
     catch (error) {
-        res.status(400).send(error);
+        res.status(400).json(error);
     }
 });
 const updateCommentById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const commentId = req.params.id;
     const updatedData = req.body;
     try {
-        const updatedPost = yield comments_modules_1.default.findByIdAndUpdate(commentId, updatedData, {
+        const updatedComment = yield comments_modules_1.default.findByIdAndUpdate(commentId, updatedData, {
             new: true,
         });
-        if (!updatedPost) {
-            return res.status(404).send("Post not found");
+        if (!updatedComment) {
+            return res.status(404).json({ error: "Comment not found" });
         }
-        res.status(200).send(updatedPost);
+        res.status(200).json(updatedComment);
     }
     catch (error) {
-        res.status(400).send(error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 const deleteCommentById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -106,6 +106,7 @@ const deleteCommentById = (req, res) => __awaiter(void 0, void 0, void 0, functi
             return res.status(404).json({ error: "Comment not found" });
         }
         const userId = req.params.userId;
+        console.log("comment user id" + userId);
         if (comment.userId.toString() !== userId) {
             return res
                 .status(403)

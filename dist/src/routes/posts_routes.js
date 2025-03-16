@@ -158,7 +158,9 @@ router.post("/", auth_controller_1.authMiddleware, multer_config_1.default.singl
  *       500:
  *         description: Server error.
  */
-router.get("/:id", posts_controller_1.default.getPostById);
+router.get("/:id", (req, res) => {
+    posts_controller_1.default.getPostById(req, res);
+});
 /**
  * @swagger
  * /posts:
