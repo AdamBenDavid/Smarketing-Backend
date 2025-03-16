@@ -135,7 +135,7 @@ describe("Posts API Tests", () => {
     const response = await request(app).get(
       `/posts/${new mongoose.Types.ObjectId()}`
     );
-    expect(response.statusCode).toBe(400);
+    expect(response.statusCode).toBe(404);
     expect(response.text).toBe("post not found");
   });
 
