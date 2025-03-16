@@ -6,6 +6,8 @@ import multer from "multer";
 import { Request, Response } from "express";
 import commentsModel from "../modules/comments_modules";
 import mongoose from "mongoose";
+import path from "path";
+import fs from "fs";
 
 const addPost = async (req: Request, res: Response) => {
   try {
@@ -199,6 +201,28 @@ const removeLike = async (req: Request, res: Response): Promise<void> => {
 
 const deletePosts = async (req: Request, res: Response) => {
   try {
+    const allposts = await postModel.find();
+
+    // מחיקת כל התמונות
+    allposts.forEach((post) => {
+      if (post.image) {
+        const imagePath = path.join(
+          __dirname,
+          "../../uploads/post_images",
+          post.image.split("/").pop()!
+        );
+        console.log("Deleting image:", imagePath);
+
+        fs.unlink(imagePath, (err) => {
+          if (err) {
+            console.error(`Failed to delete image: ${post.image}`, err);
+          } else {
+            console.log(`Image deleted: ${post.image}`);
+          }
+        });
+      }
+    });
+
     const posts = await postModel.deleteMany();
     res.send(posts);
     return;
@@ -207,9 +231,37 @@ const deletePosts = async (req: Request, res: Response) => {
   }
 };
 
-const deletePostById = async (req: Request, res: Response) => {
+export const deletePostById = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const postId = req.params.id;
+
   try {
+    const post = await postModel.findById(postId);
+
+    if (!post) {
+      res.status(404).json({ message: "Post not found" });
+      return;
+    }
+
+    // מחיקת התמונה
+    if (post.image) {
+      const imagePath = path.join(
+        __dirname,
+        "../../uploads/post_images",
+        post.image.split("/").pop()!
+      );
+      console.log("Deleting image: ", imagePath);
+      fs.unlink(imagePath, (err) => {
+        if (err) {
+          console.error("Failed to delete image:", err);
+        } else {
+          console.log("Image deleted successfully:", post.image);
+        }
+      });
+    }
+
     const deletedPost = await postModel.findByIdAndDelete(postId);
     if (!deletedPost) {
       res.status(404).json({ message: "Post not found" });
@@ -219,6 +271,45 @@ const deletePostById = async (req: Request, res: Response) => {
     return;
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+//
+export const deletePostImage = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    console.log("delete image backend function");
+    const deleteImagePath = req.params.imagePath;
+
+    if (!deleteImagePath) {
+      res.status(400).json({ error: "Image path is required" });
+      return;
+    }
+
+    const imageFullPath = path.join(
+      __dirname,
+      "../../uploads/post_images",
+      deleteImagePath.replace("/uploads/", "")
+    );
+
+    console.log("Deleting image after edit:", imageFullPath);
+
+    if (fs.existsSync(imageFullPath)) {
+      fs.unlink(imageFullPath, (err) => {
+        if (err) {
+          console.error("Error deleting image:", err);
+          return res.status(500).json({ error: "Failed to delete image" });
+        }
+        res.status(200).json({ message: "Image deleted successfully" });
+      });
+    } else {
+      res.status(404).json({ error: "Image not found" });
+    }
+  } catch (error) {
+    console.log("Error in deleteImage:", error);
+    res.status(500).json({ error: "Internal server error" + error });
   }
 };
 
@@ -232,4 +323,5 @@ export default {
   addLike,
   removeLike,
   deletePostById,
+  deletePostImage,
 };
