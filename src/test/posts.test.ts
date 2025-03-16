@@ -88,28 +88,43 @@ describe("Posts API Tests", () => {
   });
 
   //get all posts
-  test("Should get all posts (200)", async () => {
-    const response = await request(app).get("/posts");
-    expect(response.statusCode).toBe(200);
-    expect(Array.isArray(response.body)).toBeTruthy();
+  test("✅ Should return posts and hasMore", async () => {
+    const mockPosts = [
+      { _id: "1", title: "Post 1", comments: [] },
+      { _id: "2", title: "Post 2", comments: [] },
+    ];
+
+    jest.spyOn(postModel, "find").mockReturnValue({
+      populate: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockResolvedValue(mockPosts),
+    } as any);
+
+    jest.spyOn(postModel, "countDocuments").mockResolvedValue(10);
+
+    const response = await request(app).get("/posts?page=1&limit=2");
+
+    expect(response.status).toBe(200);
+    expect(response.body.posts).toHaveLength(2);
+    expect(response.body.hasMore).toBe(true);
   });
 
-  test("Should get a post by ID (200)", async () => {
-    const response = await request(app).get(`/posts/${postId}`);
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toHaveProperty("_id", postId);
-  });
-
-  test("Should return 500 when database error occurs in getAllPosts", async () => {
-    jest.spyOn(postModel, "find").mockImplementationOnce(() => {
-      throw new Error("Database error");
+  test("⚠️ Should return 500 if database error occurs", async () => {
+    jest.spyOn(postModel, "find").mockImplementation(() => {
+      throw new Error("DB Error");
     });
 
     const response = await request(app).get("/posts");
 
-    expect(response.statusCode).toBe(400);
+    expect(response.status).toBe(500);
+    expect(response.body.error).toBe("Internal server error");
+  });
 
-    jest.restoreAllMocks();
+  //get post by post id
+  test("Should get a post by ID (200)", async () => {
+    const response = await request(app).get(`/posts/${postId}`);
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty("_id", postId);
   });
 
   //get post by sender ID
@@ -136,7 +151,7 @@ describe("Posts API Tests", () => {
       `/posts/${new mongoose.Types.ObjectId()}`
     );
     expect(response.statusCode).toBe(404);
-    expect(response.text).toBe("post not found");
+    expect(response.body.error).toBe("Post not found");
   });
 
   //update post

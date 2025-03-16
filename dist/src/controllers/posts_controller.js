@@ -16,6 +16,7 @@ const post_modules_1 = __importDefault(require("../modules/post_modules"));
 const multer_1 = __importDefault(require("multer"));
 ("../modules/user_modules");
 const comments_modules_1 = __importDefault(require("../modules/comments_modules"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const addPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { postData, senderId } = req.body;
@@ -41,17 +42,19 @@ const addPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 const getAllPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const posts = yield post_modules_1.default.find().populate("comments");
-        // Fetch comments for each post safely
-        const postsWithComments = yield Promise.all(posts.map((post) => __awaiter(void 0, void 0, void 0, function* () {
-            if (!post)
-                return {};
-            const comments = yield comments_modules_1.default.find({ postId: post._id });
-            return Object.assign(Object.assign({}, post.toObject()), { comments });
-        })));
-        res
-            .status(200)
-            .json(postsWithComments.filter((p) => Object.keys(p).length > 0));
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 6;
+        const skip = (page - 1) * limit;
+        const posts = yield post_modules_1.default
+            .find()
+            .populate("comments")
+            .skip(skip)
+            .limit(limit);
+        const totalPosts = yield post_modules_1.default.countDocuments();
+        res.status(200).json({
+            posts,
+            hasMore: page * limit < totalPosts,
+        });
     }
     catch (error) {
         res.status(500).json({ error: "Internal server error" });
@@ -59,6 +62,9 @@ const getAllPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 });
 const getPostById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const postId = req.params.id;
+    if (!mongoose_1.default.Types.ObjectId.isValid(postId) || !postId) {
+        return res.status(400).json({ error: "Invalid post ID" });
+    }
     try {
         const post = yield post_modules_1.default.findById(postId).populate("comments");
         if (!post) {
