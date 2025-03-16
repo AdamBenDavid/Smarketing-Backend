@@ -307,4 +307,40 @@ router.put("/like/:postId", authMiddleware, postsController.addLike);
  */
 router.put("/unlike/:postId", authMiddleware, postsController.removeLike);
 
+/**
+ * @swagger
+ * /posts/delete-image:
+ *   post:
+ *     summary: Delete an image from the server
+ *     tags: [Images]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ImageDeleteRequest'
+ *     responses:
+ *       200:
+ *         description: Image deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ImageDeleteResponse'
+ *       400:
+ *         description: Bad request. Missing image path.
+ *       401:
+ *         description: Unauthorized. Missing or invalid token.
+ *       404:
+ *         description: Image not found.
+ *       500:
+ *         description: Internal server error.
+ */
+router.delete(
+  "/delete-image/:imagePath",
+  authMiddleware,
+  postsController.deletePostImage
+);
+
 export default router;
