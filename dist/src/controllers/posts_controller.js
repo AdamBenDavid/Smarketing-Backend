@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const post_modules_1 = __importDefault(require("../modules/post_modules"));
 const multer_1 = __importDefault(require("multer"));
 ("../modules/user_modules");
+const comments_modules_1 = __importDefault(require("../modules/comments_modules"));
 const addPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { postData, senderId } = req.body;
@@ -40,29 +41,35 @@ const addPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 const getAllPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const posts = yield post_modules_1.default.find();
-        res.send(posts);
-        return;
+        const posts = yield post_modules_1.default.find().populate("comments");
+        // Fetch comments for each post safely
+        const postsWithComments = yield Promise.all(posts.map((post) => __awaiter(void 0, void 0, void 0, function* () {
+            if (!post)
+                return {};
+            const comments = yield comments_modules_1.default.find({ postId: post._id });
+            return Object.assign(Object.assign({}, post.toObject()), { comments });
+        })));
+        res
+            .status(200)
+            .json(postsWithComments.filter((p) => Object.keys(p).length > 0));
     }
     catch (error) {
-        res.status(400).send(error);
+        res.status(500).json({ error: "Internal server error" });
     }
 });
 const getPostById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const postId = req.params.id;
     try {
-        const post = yield post_modules_1.default.findById(postId);
-        if (post != null) {
-            res.status(200).json(post);
+        const post = yield post_modules_1.default.findById(postId).populate("comments");
+        if (!post) {
+            res.status(404).json({ error: "Post not found" });
             return;
         }
-        else {
-            res.status(400).send("post not found");
-            return;
-        }
+        const comments = yield comments_modules_1.default.find({ postId });
+        res.status(200).json(Object.assign(Object.assign({}, post.toObject()), { comments }));
     }
     catch (error) {
-        res.status(400).send(error);
+        res.status(500).json({ error: "Internal server error" });
     }
 });
 const upload = (0, multer_1.default)({ dest: "uploads/post_images" });

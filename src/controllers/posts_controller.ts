@@ -5,6 +5,7 @@ import multer from "multer";
 ("../modules/user_modules");
 import { Request, Response } from "express";
 import commentsModel from "../modules/comments_modules";
+import mongoose from "mongoose";
 
 const addPost = async (req: Request, res: Response) => {
   try {
@@ -56,9 +57,11 @@ const getAllPosts = async (req: Request, res: Response) => {
 
 const getPostById = async (req: Request, res: Response) => {
   const postId = req.params.id;
+  if (!mongoose.Types.ObjectId.isValid(postId) || !postId) {
+    return res.status(400).json({ error: "Invalid post ID" });
+  }
 
   try {
-
     const post = await postModel.findById(postId).populate("comments");
     if (!post) {
       res.status(404).json({ error: "Post not found" });

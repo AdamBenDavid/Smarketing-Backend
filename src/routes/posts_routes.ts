@@ -153,7 +153,9 @@ router.post(
  *       500:
  *         description: Server error.
  */
-router.get("/:id", postsController.getPostById);
+router.get("/:id", (req, res) => {
+  postsController.getPostById(req, res);
+});
 
 /**
  * @swagger

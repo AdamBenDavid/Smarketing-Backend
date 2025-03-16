@@ -47,6 +47,7 @@
     "test:chat": "jest src/test/chat.test.ts --detectOpenHandles --forceExit --verbose",
     "test:posts": "jest src/test/posts.test.ts --detectOpenHandles --forceExit --verbose",
     "test:users": "jest src/test/users.test.ts --detectOpenHandles --forceExit --verbose",
+    "test:comments": "jest src/test/comments.test.ts --detectOpenHandles --forceExit --verbose",
 
     "dev": "copy .env_dev .env && nodemon ./src/app.ts",
     "lint": "eslint . --ext .ts",
