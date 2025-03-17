@@ -106,32 +106,40 @@ const updateCommentById = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Comment not found" });
     }
     res.status(200).json(updatedComment);
+    return;
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
+    return;
   }
 };
 
 const deleteCommentById = async (req: Request, res: Response) => {
-  console.log("Delete request received for ID:", req.params.id);
+  console.log("delete comment by id");
+  console.log("Delete request received for commentID:", req.params.commentId);
 
   try {
-    const commentId = req.params.id;
+    const commentId = req.params.commentId;
+
     const comment = await commentsModel.findById(commentId);
-
     if (!comment) {
-      return res.status(404).json({ error: "Comment not found" });
+      res.status(404).json({ error: "Comment not found" });
+      return;
     }
-    const userId = req.params.userId;
-    console.log("comment user id" + userId);
+    console.log("comment found " + comment._id);
 
-    if (comment.userId.toString() !== userId) {
-      return res
-        .status(403)
-        .json({ error: "Forbidden: You can only delete your own comments" });
-    }
+    console.log("before post delete comment");
+    const updatedPost = await postModel.findOneAndUpdate(
+      { _id: comment.postId },
+      { $pull: { comments: commentId } },
+      { new: true }
+    );
+    console.log("after post delete comment");
 
+    console.log("before comment delete");
     await commentsModel.findByIdAndDelete(commentId);
+    console.log("backend deleted successfully");
     res.status(200).json({ message: "Comment deleted successfully" });
+    return;
   } catch (error) {
     console.error("Error deleting comment:", error);
     res.status(500).json({ error: "Internal Server Error" });
