@@ -27,7 +27,7 @@ import { authMiddleware } from "../controllers/auth_controller";
  *                 $ref: '#/components/schemas/User'
  */
 
-router.get("/", usersController.getAllUsers);
+//router.get("/", usersController.getAllUsers);
 
 /**
  * @swagger

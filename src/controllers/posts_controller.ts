@@ -12,7 +12,6 @@ import fs from "fs";
 const addPost = async (req: Request, res: Response) => {
   try {
     const { postData, senderId } = req.body;
-    console.log("add post postData " + postData + "senderId " + senderId);
     if (!senderId) {
       res.status(400).json({ error: "Sender ID is required" });
       return;
@@ -102,7 +101,6 @@ const updatePostById = async (req: Request, res: Response) => {
       if (oldImagePath && fs.existsSync(oldImagePath)) {
         try {
           await fs.promises.unlink(oldImagePath);
-          console.log("Old post image deleted:", oldImagePath);
         } catch (err) {
           console.error("Error deleting old post image:", err);
         }
@@ -152,8 +150,6 @@ const getPostBySenderId = async (req: Request, res: Response) => {
 };
 
 const addLike = async (req: Request, res: Response): Promise<void> => {
-  console.log("🔹 req.params:", JSON.stringify(req.params, null, 2));
-
   const { postId } = req.params;
   const { userId } = req.body;
 
@@ -161,9 +157,6 @@ const addLike = async (req: Request, res: Response): Promise<void> => {
     res.status(400).json({ message: "User ID is required" });
     return;
   }
-
-  console.log("🔹 postId:", postId);
-  console.log("🔹 userId:", userId);
 
   try {
     const post = await postModel.findById(postId);
@@ -227,7 +220,6 @@ const deletePosts = async (req: Request, res: Response) => {
             "../../uploads/post_images",
             post.image.split("/").pop()!
           );
-          console.log("🗑️ Deleting image:", imagePath);
 
           return new Promise((resolve, reject) => {
             fs.unlink(imagePath, (err) => {
@@ -235,7 +227,6 @@ const deletePosts = async (req: Request, res: Response) => {
                 console.error(`Failed to delete image: ${post.image}`, err);
                 reject(err);
               } else {
-                console.log(`Image deleted: ${post.image}`);
                 resolve(true);
               }
             });
@@ -276,13 +267,12 @@ export const deletePostById = async (
         "../../uploads/post_images",
         post.image.split("/").pop()!
       );
-      console.log("🗑️ Deleting image: ", imagePath);
 
       try {
         await fs.promises.unlink(imagePath);
-        console.log("✅ Image deleted successfully:", post.image);
+        console.log("Image deleted successfully:", post.image);
       } catch (err) {
-        console.error("❌ Failed to delete image:", err);
+        console.error("Failed to delete image:", err);
       }
     }
 

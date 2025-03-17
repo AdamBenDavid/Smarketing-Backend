@@ -16,7 +16,7 @@ const createUser = async (req: Request, res: Response) => {
 const getUserById = async (req: Request, res: Response) => {
   const userId = req.params.id; // returns mail instead of id
   try {
-    const user = await userModel.findById(userId);
+    const user = await userModel.findById(userId).select("-password");
     if (user != null) res.send(user);
     else res.status(400).send("user not found");
   } catch (error) {

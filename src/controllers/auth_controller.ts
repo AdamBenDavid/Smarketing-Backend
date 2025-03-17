@@ -28,10 +28,9 @@ const saveGoogleProfileImage = async (
     const fullPath = path.join(__dirname, "../../", imagePath);
 
     fs.writeFileSync(fullPath, response.data);
-    console.log("Google profile image saved:", fullPath);
     return imagePath;
   } catch (error) {
-    console.error("Failed to save Google profile image:", error);
+    console.error("Failed to save Google profile image");
     return null;
   }
 };
@@ -39,7 +38,6 @@ const saveGoogleProfileImage = async (
 const googleSignin = async (req: Request, res: Response): Promise<void> => {
   const credential = req.body.credential;
   if (!credential) {
-    console.error(" Missing credential");
     res.status(400).send("Missing Google credential");
     return;
   }
@@ -52,7 +50,6 @@ const googleSignin = async (req: Request, res: Response): Promise<void> => {
     });
 
     const payload = ticket.getPayload();
-    console.log("🔹 Google Payload:", payload);
 
     if (!payload || !payload.email) {
       console.error("Invalid Google token or missing email in payload");
@@ -66,7 +63,7 @@ const googleSignin = async (req: Request, res: Response): Promise<void> => {
     if (!user) {
       const randomPassword = crypto.randomBytes(16).toString("hex");
 
-      console.log("🔹 Creating new user...");
+      console.log("Creating new user...");
       user = await userModel.create({
         email: email,
         password: randomPassword,
@@ -104,7 +101,6 @@ const googleSignin = async (req: Request, res: Response): Promise<void> => {
       }
     }
 
-    console.log("🔹 Generating tokens for user...");
     const tokens = await generateToken(user);
 
     res.status(200).send({
@@ -119,7 +115,7 @@ const googleSignin = async (req: Request, res: Response): Promise<void> => {
       accessToken: tokens.accessToken,
     });
   } catch (err: any) {
-    console.error("Google Sign-in Error:", err);
+    console.error("Google Sign-in Error");
     res.status(400).send({ message: err.message });
   }
 };
@@ -141,7 +137,6 @@ const generateToken = async (user: Document & User) => {
 const register = async (req: Request, res: Response) => {
   try {
     const { email, password, fullName } = req.body;
-    console.log("registering user:", email, password, fullName);
 
     if (!email || !password || !fullName) {
       res.status(400).send("Missing required fields");
@@ -262,69 +257,14 @@ type tUser = Document<unknown, {}, User> &
     __v: number;
   };
 
-// const verifyRefreshToken = (refreshToken: string | undefined) => {
-//   return new Promise<tUser>((resolve, reject) => {
-//     if (!refreshToken) {
-//       reject("fail");
-//       return;
-//     }
-//     if (!process.env.TOKEN_SECRET) {
-//       reject("fail");
-//       return;
-//     }
-
-//     jwt.verify(
-//       refreshToken,
-//       process.env.TOKEN_SECRET,
-//       async (err: any, payload: any) => {
-//         if (err) {
-//           reject("fail");
-//           return;
-//         }
-
-//         const userId = payload._id;
-//         try {
-//           const user = await userModel.findById(userId);
-//           if (!user) {
-//             reject("fail");
-//             return;
-//           }
-
-//           console.log(
-//             "🔹 Before removing old refreshToken:",
-//             user.refreshToken
-//           );
-
-//           // **🔥 מחיקת הישן ושמירת הרשימה המעודכנת 🔥**
-//           user.refreshToken = user.refreshToken?.filter(
-//             (token) => token !== refreshToken
-//           );
-//           await user.save();
-
-//           console.log("✅ After removing old refreshToken:", user.refreshToken);
-
-//           resolve(user);
-//         } catch (err) {
-//           reject("fail");
-//           return;
-//         }
-//       }
-//     );
-//   });
-// };
-
 const verifyRefreshToken = (refreshToken: string | undefined) => {
   return new Promise<tUser>(async (resolve, reject) => {
-    console.log("Verifying refresh token:", refreshToken);
-
     if (!refreshToken) {
-      console.log("No refresh token provided");
       reject("fail");
       return;
     }
 
     if (!process.env.TOKEN_SECRET) {
-      console.log("Missing TOKEN_SECRET");
       reject("fail");
       return;
     }
@@ -339,44 +279,28 @@ const verifyRefreshToken = (refreshToken: string | undefined) => {
           return;
         }
 
-        console.log("Refresh token decoded, user ID:", payload._id);
         const userId = payload._id;
 
         try {
           const user = await userModel.findById(userId);
           if (!user) {
-            console.log("User not found for refresh token");
             reject("fail");
             return;
           }
 
-          console.log("User found:", user.email);
-          console.log(
-            "🔹 Stored refresh tokens before check:",
-            user.refreshToken
-          );
-
           if (!user.refreshToken || !user.refreshToken.includes(refreshToken)) {
-            console.log("Refresh token not found in user record!");
             reject("check fail");
             return;
           }
-
-          console.log("Refresh token found in user record.");
 
           user.refreshToken = user.refreshToken.filter(
             (token) => token !== refreshToken
           );
           await user.save();
 
-          console.log(
-            "Old refresh token removed, remaining tokens:",
-            user.refreshToken
-          );
-
           resolve(user);
         } catch (err) {
-          console.error("Database error:", err);
+          console.error("Database error");
           reject("fail");
         }
       }
@@ -386,10 +310,7 @@ const verifyRefreshToken = (refreshToken: string | undefined) => {
 
 const logout = async (req: Request, res: Response) => {
   try {
-    console.log("logout " + req.body.refreshToken);
     const user = await verifyRefreshToken(req.body.refreshToken);
-
-    console.log("logout user:", user);
 
     await user.save();
     res.status(200).send("success");
@@ -400,16 +321,9 @@ const logout = async (req: Request, res: Response) => {
 
 const refresh = async (req: Request, res: Response) => {
   try {
-    console.log(
-      "🔹 Received refresh request with token:",
-      req.body.refreshToken
-    );
-
-    console.log("refresh" + req.body.refreshToken);
     const user = await verifyRefreshToken(req.body.refreshToken).catch(
       (err) => {
         if (err === "check fail") {
-          console.log("Double use of refresh token detected!");
           res.status(400).send("check fail");
           return null;
         }
@@ -419,23 +333,17 @@ const refresh = async (req: Request, res: Response) => {
 
     if (!user) return;
 
-    console.log("Valid refresh token - Generating new tokens...");
-
     const tokens = createToken(user._id);
     if (!tokens) {
-      console.log("Failed to generate tokens");
       res.status(500).send("Server Error");
       return;
     }
 
-    console.log("Adding new refresh token to user's list...");
     if (!user.refreshToken) {
       user.refreshToken = [];
     }
     user.refreshToken.push(tokens.refreshToken);
     await user.save();
-
-    console.log("Successfully issued new tokens:", tokens);
 
     res.status(200).send({
       accessToken: tokens.accessToken,
@@ -443,7 +351,6 @@ const refresh = async (req: Request, res: Response) => {
       _id: user._id,
     });
   } catch (err) {
-    console.error("Error in refresh route:", err);
     res.status(500).send("Internal Server Error");
   }
 };
@@ -459,8 +366,6 @@ export const authMiddleware = (
 ) => {
   const authorization = req.header("authorization");
   const token = authorization && authorization.split(" ")[1];
-
-  console.log("🔹 Authorization token:", token);
 
   if (!token) {
     res.status(401).send("Access Denied");
@@ -488,7 +393,6 @@ const updateProfile = async (req: Request, res: Response): Promise<void> => {
   try {
     log("Updating profile...");
     const userId = req.params.id;
-    console.log("update profile userId:", userId);
 
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       res.status(400).send({ message: "Invalid user ID" });
@@ -496,7 +400,6 @@ const updateProfile = async (req: Request, res: Response): Promise<void> => {
     }
 
     const user = await userModel.findById(userId);
-    console.log("update profile user:", user);
 
     if (!user) {
       res.status(404).send({ message: "User not found" });
@@ -522,9 +425,8 @@ const updateProfile = async (req: Request, res: Response): Promise<void> => {
         if (oldImagePath && fs.existsSync(oldImagePath)) {
           try {
             await fs.promises.unlink(oldImagePath);
-            console.log("Old profile image deleted:", oldImagePath);
           } catch (err) {
-            console.error("Error deleting old profile image:", err);
+            res.status(500).send({ message: "Server error" });
           }
         }
       }
@@ -547,7 +449,6 @@ const updateProfile = async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (err) {
-    console.error("Profile Update Error:", err);
     res.status(500).send({ message: "Server error" + err });
   }
 };
@@ -564,7 +465,6 @@ const getUserById = async (req: Request, res: Response): Promise<void> => {
 
     res.status(200).send(user);
   } catch (error) {
-    console.error(" Error fetching user:", error);
     res.status(500).send({ message: "Server error" });
   }
 };

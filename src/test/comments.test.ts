@@ -186,7 +186,6 @@ describe("Comments API Tests", () => {
       .send({ email: "other@user.com", password: "Other User" });
     expect(otherLogin.statusCode).toBe(200);
     const otherToken = otherLogin.body.accessToken;
-    console.log("other token" + otherLogin.body.accessToken);
 
     const response = await request(app)
       .delete(`/comments/${commentId}`)

@@ -28,9 +28,6 @@ beforeAll(async () => {
   userToken = jwt.sign({ _id: testUser._id }, process.env.TOKEN_SECRET!, {
     expiresIn: "1h",
   });
-
-  console.log("✅ User created:", testUser._id.toString());
-  console.log("✅ User token:", userToken);
 });
 
 afterAll((done) => {
@@ -205,7 +202,6 @@ describe("Posts API Tests", () => {
 
     await newPost.save();
     const savedPost = await postModel.findById(newPost._id);
-    console.log("✅ Saved Post in DB:", savedPost);
 
     const response = await request(app)
       .put(`/posts/like/${newPost._id.toString()}`)

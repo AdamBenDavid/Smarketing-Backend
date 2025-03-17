@@ -23,14 +23,10 @@ export async function getGeminiImageDescription(
   req: Request,
   res: Response
 ): Promise<void> {
-  console.log("getGeminiImageDescription התחיל...");
-
   try {
     let { base64Image } = req.body;
-    console.log("קלט מהפרונט:", base64Image ? "יש תמונה" : "אין תמונה");
 
     if (!base64Image) {
-      console.log("לא נבחרה תמונה");
       res.status(400).json({ error: "לא נבחרה תמונה" });
     }
 
@@ -64,7 +60,6 @@ export async function getGeminiImageDescription(
     const description = (await result.response.text()) || "לא ניתן ליצור תיאור";
 
     res.json({ response: description });
-    console.log("תיאור התמונה:", description);
   } catch (error) {
     console.error("שגיאה בשליחת תמונה ל-Gemini:", error);
     res.status(500).json({ error: "שגיאה בשרת" });
