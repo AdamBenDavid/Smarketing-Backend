@@ -11,9 +11,30 @@ import path from "path";
 import mongoose from "mongoose";
 
 import dotenv from "dotenv";
+import axios from "axios";
 dotenv.config();
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+const saveGoogleProfileImage = async (
+  googleImageUrl: string,
+  userId: string
+) => {
+  try {
+    const response = await axios.get(googleImageUrl, {
+      responseType: "arraybuffer",
+    });
+    const imagePath = `uploads/profile_pictures/${userId}.jpg`;
+    const fullPath = path.join(__dirname, "../../", imagePath);
+
+    fs.writeFileSync(fullPath, response.data);
+    console.log("Google profile image saved:", fullPath);
+    return imagePath;
+  } catch (error) {
+    console.error("Failed to save Google profile image:", error);
+    return null;
+  }
+};
 
 const googleSignin = async (req: Request, res: Response): Promise<void> => {
   const credential = req.body.credential;
@@ -50,12 +71,36 @@ const googleSignin = async (req: Request, res: Response): Promise<void> => {
         email: email,
         password: randomPassword,
         fullName: payload.name,
-        profilePicture: payload.picture,
+        profilePicture: "",
       });
+
+      //save image from google
+      if (payload.picture) {
+        const savedImage = await saveGoogleProfileImage(
+          payload.picture,
+          user._id.toString()
+        );
+        if (savedImage) {
+          user.profilePicture = savedImage;
+          await user.save();
+        }
+      }
     } else {
-      if (!user.profilePicture) {
-        user.profilePicture = payload.picture;
-        await user.save();
+      //save image from google
+      if (
+        !user.profilePicture ||
+        user.profilePicture.includes("googleusercontent.com")
+      ) {
+        if (payload.picture) {
+          const savedImage = await saveGoogleProfileImage(
+            payload.picture,
+            user._id.toString()
+          );
+          if (savedImage) {
+            user.profilePicture = savedImage;
+            await user.save();
+          }
+        }
       }
     }
 
@@ -68,8 +113,8 @@ const googleSignin = async (req: Request, res: Response): Promise<void> => {
         email: user.email,
         fullName: user.fullName,
         profilePicture: user.profilePicture
-          ? user.profilePicture
-          : "https://placehold.co/150x150",
+          ? `http://localhost:3000/${user.profilePicture}`
+          : null,
       },
       accessToken: tokens.accessToken,
     });
