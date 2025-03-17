@@ -270,16 +270,16 @@ type tUser = Document<unknown, {}, User> &
 
 const verifyRefreshToken = (refreshToken: string | undefined) => {
   return new Promise<tUser>(async (resolve, reject) => {
-    console.log("🔹 Verifying refresh token:", refreshToken);
+    console.log("Verifying refresh token:", refreshToken);
 
     if (!refreshToken) {
-      console.log("❌ No refresh token provided");
+      console.log("No refresh token provided");
       reject("fail");
       return;
     }
 
     if (!process.env.TOKEN_SECRET) {
-      console.log("❌ Missing TOKEN_SECRET");
+      console.log("Missing TOKEN_SECRET");
       reject("fail");
       return;
     }
@@ -289,50 +289,49 @@ const verifyRefreshToken = (refreshToken: string | undefined) => {
       process.env.TOKEN_SECRET,
       async (err: any, payload: any) => {
         if (err) {
-          console.error("❌ Invalid refresh token:", err);
+          console.error("Invalid refresh token:", err);
           reject("fail");
           return;
         }
 
-        console.log("✅ Refresh token decoded, user ID:", payload._id);
+        console.log("Refresh token decoded, user ID:", payload._id);
         const userId = payload._id;
 
         try {
           const user = await userModel.findById(userId);
           if (!user) {
-            console.log("❌ User not found for refresh token");
+            console.log("User not found for refresh token");
             reject("fail");
             return;
           }
 
-          console.log("🔹 User found:", user.email);
+          console.log("User found:", user.email);
           console.log(
             "🔹 Stored refresh tokens before check:",
             user.refreshToken
           );
 
           if (!user.refreshToken || !user.refreshToken.includes(refreshToken)) {
-            console.log("❌ Refresh token not found in user record!");
-            reject("check fail"); // ✅ מחזירים הודעה ברורה במקום לזרוק שגיאה כללית
+            console.log("Refresh token not found in user record!");
+            reject("check fail");
             return;
           }
 
-          console.log("✅ Refresh token found in user record.");
+          console.log("Refresh token found in user record.");
 
-          // 🔹 מסירים את הטוקן הישן
           user.refreshToken = user.refreshToken.filter(
             (token) => token !== refreshToken
           );
           await user.save();
 
           console.log(
-            "✅ Old refresh token removed, remaining tokens:",
+            "Old refresh token removed, remaining tokens:",
             user.refreshToken
           );
 
           resolve(user);
         } catch (err) {
-          console.error("❌ Database error:", err);
+          console.error("Database error:", err);
           reject("fail");
         }
       }
@@ -365,33 +364,33 @@ const refresh = async (req: Request, res: Response) => {
     const user = await verifyRefreshToken(req.body.refreshToken).catch(
       (err) => {
         if (err === "check fail") {
-          console.log("❌ Double use of refresh token detected!");
-          res.status(400).send("check fail"); // ✅ שליחת שגיאה במקום להגיע ל- `catch`
+          console.log("Double use of refresh token detected!");
+          res.status(400).send("check fail");
           return null;
         }
-        throw err; // אם זו שגיאה אחרת, מעבירים אותה הלאה
+        throw err;
       }
     );
 
-    if (!user) return; // ✅ אם כבר טיפלנו בשגיאה, אין צורך להמשיך
+    if (!user) return;
 
-    console.log("✅ Valid refresh token - Generating new tokens...");
+    console.log("Valid refresh token - Generating new tokens...");
 
     const tokens = createToken(user._id);
     if (!tokens) {
-      console.log("❌ Failed to generate tokens");
+      console.log("Failed to generate tokens");
       res.status(500).send("Server Error");
       return;
     }
 
-    console.log("🔹 Adding new refresh token to user's list...");
+    console.log("Adding new refresh token to user's list...");
     if (!user.refreshToken) {
       user.refreshToken = [];
     }
     user.refreshToken.push(tokens.refreshToken);
     await user.save();
 
-    console.log("✅ Successfully issued new tokens:", tokens);
+    console.log("Successfully issued new tokens:", tokens);
 
     res.status(200).send({
       accessToken: tokens.accessToken,
@@ -399,7 +398,7 @@ const refresh = async (req: Request, res: Response) => {
       _id: user._id,
     });
   } catch (err) {
-    console.error("❌ Error in refresh route:", err);
+    console.error("Error in refresh route:", err);
     res.status(500).send("Internal Server Error");
   }
 };
@@ -445,6 +444,7 @@ const updateProfile = async (req: Request, res: Response): Promise<void> => {
     log("Updating profile...");
     const userId = req.params.id;
     console.log("update profile userId:", userId);
+
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       res.status(400).send({ message: "Invalid user ID" });
       return;
@@ -461,22 +461,26 @@ const updateProfile = async (req: Request, res: Response): Promise<void> => {
     const { fullName } = req.body;
     const file = req.file;
 
+    //delete previous image from db
     if (file) {
       const uploadsDir = path.join(
         __dirname,
         "../../uploads/profile_pictures/"
       );
-      if (
-        user.profilePicture &&
-        user.profilePicture.startsWith("uploads/profile_pictures/")
-      ) {
+      if (user.profilePicture) {
         const oldImagePath = path.join(
           __dirname,
           "../../",
           user.profilePicture
         );
-        if (fs.existsSync(oldImagePath)) {
-          fs.unlinkSync(oldImagePath);
+
+        if (oldImagePath && fs.existsSync(oldImagePath)) {
+          try {
+            await fs.promises.unlink(oldImagePath);
+            console.log("Old profile image deleted:", oldImagePath);
+          } catch (err) {
+            console.error("Error deleting old profile image:", err);
+          }
         }
       }
 

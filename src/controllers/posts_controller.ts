@@ -90,11 +90,27 @@ const updatePostById = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Post not found" });
     }
 
-    const image = req.file
-      ? `uploads/post_images/${req.file.filename}`
-      : existingPost.image;
+    let image = existingPost.image;
 
-    // עדכון הפוסט
+    //delete previous image from db
+    if (req.file) {
+      const newImagePath = `uploads/post_images/${req.file.filename}`;
+      const oldImagePath = existingPost.image
+        ? path.join(__dirname, "../../", existingPost.image)
+        : null;
+
+      if (oldImagePath && fs.existsSync(oldImagePath)) {
+        try {
+          await fs.promises.unlink(oldImagePath);
+          console.log("Old post image deleted:", oldImagePath);
+        } catch (err) {
+          console.error("Error deleting old post image:", err);
+        }
+      }
+
+      image = newImagePath;
+    }
+
     const updatedPost = await postModel.findByIdAndUpdate(
       postId,
       { postData, image },
@@ -203,31 +219,39 @@ const deletePosts = async (req: Request, res: Response) => {
   try {
     const allposts = await postModel.find();
 
-    // מחיקת כל התמונות
-    allposts.forEach((post) => {
-      if (post.image) {
-        const imagePath = path.join(
-          __dirname,
-          "../../uploads/post_images",
-          post.image.split("/").pop()!
-        );
-        console.log("Deleting image:", imagePath);
+    await Promise.all(
+      allposts.map((post) => {
+        if (post.image) {
+          const imagePath = path.join(
+            __dirname,
+            "../../uploads/post_images",
+            post.image.split("/").pop()!
+          );
+          console.log("🗑️ Deleting image:", imagePath);
 
-        fs.unlink(imagePath, (err) => {
-          if (err) {
-            console.error(`Failed to delete image: ${post.image}`, err);
-          } else {
-            console.log(`Image deleted: ${post.image}`);
-          }
-        });
-      }
+          return new Promise((resolve, reject) => {
+            fs.unlink(imagePath, (err) => {
+              if (err) {
+                console.error(`Failed to delete image: ${post.image}`, err);
+                reject(err);
+              } else {
+                console.log(`Image deleted: ${post.image}`);
+                resolve(true);
+              }
+            });
+          });
+        }
+      })
+    );
+
+    const deletedPosts = await postModel.deleteMany();
+    res.status(200).json({
+      message: "All posts and images deleted successfully",
+      deletedPosts,
     });
-
-    const posts = await postModel.deleteMany();
-    res.send(posts);
-    return;
   } catch (error) {
-    res.status(400).send(error);
+    console.error("Error deleting posts and images:", error);
+    res.status(500).json({ error: "Internal server error", details: error });
   }
 };
 
@@ -245,21 +269,21 @@ export const deletePostById = async (
       return;
     }
 
-    // מחיקת התמונה
+    //delete image from db
     if (post.image) {
       const imagePath = path.join(
         __dirname,
         "../../uploads/post_images",
         post.image.split("/").pop()!
       );
-      console.log("Deleting image: ", imagePath);
-      fs.unlink(imagePath, (err) => {
-        if (err) {
-          console.error("Failed to delete image:", err);
-        } else {
-          console.log("Image deleted successfully:", post.image);
-        }
-      });
+      console.log("🗑️ Deleting image: ", imagePath);
+
+      try {
+        await fs.promises.unlink(imagePath);
+        console.log("✅ Image deleted successfully:", post.image);
+      } catch (err) {
+        console.error("❌ Failed to delete image:", err);
+      }
     }
 
     const deletedPost = await postModel.findByIdAndDelete(postId);
@@ -267,49 +291,11 @@ export const deletePostById = async (
       res.status(404).json({ message: "Post not found" });
       return;
     }
-    res.status(200).json({ message: "Post deleted successfully" });
-    return;
+
+    res.status(200).json({ message: "✅ Post deleted successfully" });
   } catch (error) {
+    console.error("❌ Error deleting post:", error);
     res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
-//
-export const deletePostImage = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
-  try {
-    console.log("delete image backend function");
-    const deleteImagePath = req.params.imagePath;
-
-    if (!deleteImagePath) {
-      res.status(400).json({ error: "Image path is required" });
-      return;
-    }
-
-    const imageFullPath = path.join(
-      __dirname,
-      "../../uploads/post_images",
-      deleteImagePath.replace("/uploads/", "")
-    );
-
-    console.log("Deleting image after edit:", imageFullPath);
-
-    if (fs.existsSync(imageFullPath)) {
-      fs.unlink(imageFullPath, (err) => {
-        if (err) {
-          console.error("Error deleting image:", err);
-          return res.status(500).json({ error: "Failed to delete image" });
-        }
-        res.status(200).json({ message: "Image deleted successfully" });
-      });
-    } else {
-      res.status(404).json({ error: "Image not found" });
-    }
-  } catch (error) {
-    console.log("Error in deleteImage:", error);
-    res.status(500).json({ error: "Internal server error" + error });
   }
 };
 
@@ -323,5 +309,4 @@ export default {
   addLike,
   removeLike,
   deletePostById,
-  deletePostImage,
 };
