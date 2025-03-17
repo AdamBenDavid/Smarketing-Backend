@@ -12,17 +12,14 @@ const sendMessage = async (req: Request, res: Response) => {
     console.log("recipientId: " + recipientId);
 
     if (!mongoose.Types.ObjectId.isValid(recipientId)) {
-      console.log("⚠️ Invalid recipient ID:", recipientId);
       return res.status(400).json({ error: "Invalid recipient ID" });
     }
 
     const recipientExists = await userModel.findById(recipientId);
     if (!recipientExists) {
-      console.log("⚠️ Recipient not found");
       return res.status(404).json({ error: "Recipient not found" });
     }
 
-    console.log("recipient exists: " + recipientExists);
     const message = new chatMessageModel({
       senderId,
       recipientId,
@@ -34,7 +31,6 @@ const sendMessage = async (req: Request, res: Response) => {
     await message.save();
     res.status(201).json(message);
   } catch (error) {
-    console.log("Error: " + (error as Error).message);
     res.status(400).json({ error: (error as Error).message });
   }
 };

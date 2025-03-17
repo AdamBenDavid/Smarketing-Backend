@@ -27,9 +27,6 @@ beforeAll(async () => {
   userToken = jwt.sign({ _id: testUser._id }, process.env.TOKEN_SECRET!, {
     expiresIn: "1h",
   });
-
-  console.log("✅ User created:", testUser._id.toString());
-  console.log("✅ User token:", userToken);
 });
 
 afterAll((done) => {

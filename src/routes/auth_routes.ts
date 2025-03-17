@@ -1,6 +1,7 @@
 import express from "express";
 import authController, { authMiddleware } from "../controllers/auth_controller";
 import upload from "../multer.config";
+import rateLimit from "express-rate-limit";
 
 const router = express.Router();
 
@@ -124,6 +125,17 @@ router.post("/register", authController.register);
  */
 router.post("/google", authController.googleSignin);
 
+//BF
+const loginLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: {
+    message: "יותר מדי ניסיונות כושלים. נסה שוב מאוחר יותר.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 /**
  * @swagger
  * /auth/login:
@@ -160,7 +172,7 @@ router.post("/google", authController.googleSignin);
  *       500:
  *         description: Server error
  */
-router.post("/login", authController.login);
+router.post("/login", loginLimiter, authController.login);
 
 /**
  * @swagger

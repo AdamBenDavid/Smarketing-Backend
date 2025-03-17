@@ -114,9 +114,6 @@ const updateCommentById = async (req: Request, res: Response) => {
 };
 
 const deleteCommentById = async (req: Request, res: Response) => {
-  console.log("delete comment by id");
-  console.log("Delete request received for commentID:", req.params.commentId);
-
   try {
     const commentId = req.params.commentId;
 
@@ -125,23 +122,17 @@ const deleteCommentById = async (req: Request, res: Response) => {
       res.status(404).json({ error: "Comment not found" });
       return;
     }
-    console.log("comment found " + comment._id);
 
-    console.log("before post delete comment");
     const updatedPost = await postModel.findOneAndUpdate(
       { _id: comment.postId },
       { $pull: { comments: commentId } },
       { new: true }
     );
-    console.log("after post delete comment");
 
-    console.log("before comment delete");
     await commentsModel.findByIdAndDelete(commentId);
-    console.log("backend deleted successfully");
     res.status(200).json({ message: "Comment deleted successfully" });
     return;
   } catch (error) {
-    console.error("Error deleting comment:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
