@@ -193,7 +193,7 @@ router.get("/:id", commentsController.getCommentById);
  *       500:
  *         description: Internal server error.
  */
-router.delete("/:id", authMiddleware, (req, res) => {
+router.delete("/:commentId", authMiddleware, (req, res) => {
   commentsController.deleteCommentById(req, res);
 });
 
