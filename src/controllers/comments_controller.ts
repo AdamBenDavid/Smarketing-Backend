@@ -29,7 +29,7 @@ const addComment = async (req: Request, res: Response) => {
       fullName: user.fullName,
       profilePicture:
         user.profilePicture ||
-        "http://localhost:3000/images/default-profile.png",
+        `${process.env.BASE_URL}/images/default-profile.png`,
       commentData,
       postId,
     });

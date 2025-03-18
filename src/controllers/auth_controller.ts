@@ -109,7 +109,7 @@ const googleSignin = async (req: Request, res: Response): Promise<void> => {
         email: user.email,
         fullName: user.fullName,
         profilePicture: user.profilePicture
-          ? `http://localhost:3000/${user.profilePicture}`
+          ? `${process.env.BASE_URL}/${user.profilePicture}`
           : null,
       },
       accessToken: tokens.accessToken,
@@ -239,7 +239,7 @@ const login = async (req: Request, res: Response) => {
       _id: user._id,
       fullName: user.fullName,
       profilePicture: user.profilePicture
-        ? `http://localhost:3000/${user.profilePicture}`
+        ? `${process.env.BASE_URL}/${user.profilePicture}`
         : null,
     });
   } catch (err) {
@@ -444,7 +444,7 @@ const updateProfile = async (req: Request, res: Response): Promise<void> => {
         _id: user._id,
         fullName: user.fullName,
         profilePicture: user.profilePicture
-          ? `http://localhost:3000/${user.profilePicture}`
+          ? `${process.env.BASE_URL}/${user.profilePicture}`
           : null,
       },
     });

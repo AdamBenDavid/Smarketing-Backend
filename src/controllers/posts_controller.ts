@@ -26,7 +26,7 @@ const addPost = async (req: Request, res: Response) => {
       _id: post._id,
       postData: post.postData,
       sender: senderId,
-      image: image ? `http://localhost:3000/${image}` : null,
+      image: image ? `${process.env.BASE_URL}/${image}` : null,
     });
     return;
   } catch (error) {

@@ -1109,7 +1109,7 @@ const login = async (req: Request, res: Response) =&gt; {
       _id: user._id,
       fullName: user.fullName,
       profilePicture: user.profilePicture
-        ? <span class="branch-0 cbranch-no" title="branch not covered" >`http://localhost:3000/${user.profilePicture}`</span>
+        ? `${process.env.BASE_URL}/${user.profilePicture}`
         : null,
     });
   } catch (err) {
@@ -1306,7 +1306,7 @@ const updateProfile = async (req: Request, res: Response): Promise&lt;void&gt; =
         _id: user._id,
         fullName: user.fullName,
         profilePicture: user.profilePicture
-          ? `http://localhost:3000/${user.profilePicture}`
+          ? `${process.env.BASE_URL}/${user.profilePicture}`
           : null,
       },
     });

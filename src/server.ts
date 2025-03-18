@@ -57,8 +57,6 @@ app.use(
 app.use("/images", express.static(path.join(__dirname, "../images")));
 
 // example for a photo location:
-// profile: http://localhost:3000/uploads/profile_pictures/your-profile.jpg
-// posts: http://localhost:3000/uploads/post_images/your-post.jpg
 app.use("/chat", chatRoutes);
 app.use("/uploads", express.static("uploads"));
 app.use("/test", express.static("."));
@@ -71,7 +69,7 @@ const options = {
       version: "1.0.0",
       description: "REST server including authentication using JWT",
     },
-    servers: [{ url: "http://localhost:3000" }],
+    servers: [{ url: process.env.BASE_URL }],
   },
   apis: ["./src/routes/*.ts"],
 };

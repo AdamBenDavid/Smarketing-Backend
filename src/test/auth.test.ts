@@ -447,7 +447,7 @@ describe("Auth Tests", () => {
 
       expect(response.statusCode).toBe(200);
       expect(response.body.user.profilePicture).toContain(
-        "http://localhost:3000/images/default-profile.png"
+        `${process.env.BASE_URL}/images/default-profile.png`
       );
     } catch (err) {
       console.error("Profile picture update error");

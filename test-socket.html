@@ -35,7 +35,7 @@
 
             updateStatus('Attempting to connect...');
             
-            socket = io('http://localhost:3000', {
+            socket = io(process.env.BASE_URL, {
                 auth: { token },
                 transports: ['websocket', 'polling'],
                 withCredentials: true

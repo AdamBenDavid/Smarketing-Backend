@@ -14,7 +14,7 @@ let connectedUsers: ConnectedUser[] = [];
 export const initializeSocket = (server: HTTPServer) => {
   const io = new SocketIOServer(server, {
     cors: {
-      origin: ["http://localhost:5173", "http://localhost:3000"],
+      origin: "*",
       methods: ["GET", "POST", "PUT", "DELETE"],
       credentials: true,
       allowedHeaders: ["Content-Type", "Authorization"]

@@ -520,7 +520,7 @@ const addPost = async (req: Request, res: Response) =&gt; {
       _id: post._id,
       postData: post.postData,
       sender: senderId,
-      image: image ? <span class="branch-0 cbranch-no" title="branch not covered" >`http://localhost:3000/${image}` </span>: null,
+      image: image ? `${process.env.BASE_URL}/${image}` : null,
     });
     return;
   } catch (error) {
