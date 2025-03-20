@@ -3,6 +3,7 @@ import { Server as HTTPServer } from 'http';
 import jwt from 'jsonwebtoken';
 import chatMessageModel from './modules/chat_modules';
 import userModel from './modules/user_modules';
+import fs from 'fs';
 
 interface ConnectedUser {
   userId: string;
@@ -12,6 +13,7 @@ interface ConnectedUser {
 let connectedUsers: ConnectedUser[] = [];
 
 export const initializeSocket = (server: HTTPServer) => {
+  const isProduction = process.env.NODE_ENV === 'production';
   const io = new SocketIOServer(server, {
     cors: {
       origin: "*",
@@ -19,8 +21,16 @@ export const initializeSocket = (server: HTTPServer) => {
       credentials: true,
       allowedHeaders: ["Content-Type", "Authorization"]
     },
-    transports: ['websocket', 'polling']
+    transports: isProduction ? ['polling'] : ['websocket', 'polling']
   });
+
+  if (isProduction) {
+    const options = {
+      key: fs.readFileSync('/home/st111/client-key.pem'),
+      cert: fs.readFileSync('/home/st111/client-cert.pem')
+    };
+    // Use options for production setup
+  }
 
   // Middleware to authenticate socket connections
   io.use((socket, next) => {

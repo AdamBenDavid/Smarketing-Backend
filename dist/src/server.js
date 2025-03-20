@@ -29,7 +29,7 @@ const app = (0, express_1.default)();
 const httpServer = (0, http_1.createServer)(app);
 exports.httpServer = httpServer;
 app.use((0, cors_1.default)({
-    origin: "http://localhost:5173",
+    origin: process.env.BASE_URL,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -48,8 +48,6 @@ app.use("/uploads/profile_pictures", express_1.default.static(path_1.default.joi
 app.use("/uploads/post_images", express_1.default.static(path_1.default.join(__dirname, "../uploads/post_images")));
 app.use("/images", express_1.default.static(path_1.default.join(__dirname, "../images")));
 // example for a photo location:
-// profile: http://localhost:3000/uploads/profile_pictures/your-profile.jpg
-// posts: http://localhost:3000/uploads/post_images/your-post.jpg
 app.use("/chat", chat_routes_1.default);
 app.use("/uploads", express_1.default.static("uploads"));
 app.use("/test", express_1.default.static("."));
@@ -61,7 +59,7 @@ const options = {
             version: "1.0.0",
             description: "REST server including authentication using JWT",
         },
-        servers: [{ url: "http://localhost:3000" }],
+        servers: [{ url: process.env.BASE_URL }],
     },
     apis: ["./src/routes/*.ts"],
 };

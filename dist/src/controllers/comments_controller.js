@@ -35,7 +35,8 @@ const addComment = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         const comment = new comments_modules_1.default({
             userId: user._id,
             fullName: user.fullName,
-            profilePicture: user.profilePicture || "https://i.pravatar.cc/50",
+            profilePicture: user.profilePicture ||
+                `${process.env.BASE_URL}/images/default-profile.png`,
             commentData,
             postId,
         });
@@ -92,31 +93,27 @@ const updateCommentById = (req, res) => __awaiter(void 0, void 0, void 0, functi
             return res.status(404).json({ error: "Comment not found" });
         }
         res.status(200).json(updatedComment);
+        return;
     }
     catch (error) {
         res.status(500).json({ error: "Internal Server Error" });
+        return;
     }
 });
 const deleteCommentById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("Delete request received for ID:", req.params.id);
     try {
-        const commentId = req.params.id;
+        const commentId = req.params.commentId;
         const comment = yield comments_modules_1.default.findById(commentId);
         if (!comment) {
-            return res.status(404).json({ error: "Comment not found" });
+            res.status(404).json({ error: "Comment not found" });
+            return;
         }
-        const userId = req.params.userId;
-        console.log("comment user id" + userId);
-        if (comment.userId.toString() !== userId) {
-            return res
-                .status(403)
-                .json({ error: "Forbidden: You can only delete your own comments" });
-        }
+        const updatedPost = yield post_modules_1.default.findOneAndUpdate({ _id: comment.postId }, { $pull: { comments: commentId } }, { new: true });
         yield comments_modules_1.default.findByIdAndDelete(commentId);
         res.status(200).json({ message: "Comment deleted successfully" });
+        return;
     }
     catch (error) {
-        console.error("Error deleting comment:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });

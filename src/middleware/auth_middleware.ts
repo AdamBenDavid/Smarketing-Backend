@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { User } from "../models/user_model";
+import  UseuserModel   from "../modules/user_modules";
 
 // Define the type for the decoded token
 interface TokenPayload {
@@ -46,7 +46,7 @@ export const authenticateToken = async (
         
         const decoded = jwt.verify(token, process.env.JWT_SECRET) as TokenPayload;
         
-        const user = await User.findById(decoded._id);
+        const user = await UseuserModel.findById(decoded._id);
         
         if (!user) {
             console.log("User not found");

@@ -6,8 +6,10 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "dist",
+    "rootDir": "src",            // <--- ADD THIS
     "strict": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "lib": ["es2015"]            // Make sure lib is inside compilerOptions
   },
-  "lib": ["es2015"]
+  "include": ["src/**/*.ts"]     // <--- ADD THIS
 }

@@ -27,7 +27,7 @@ const httpServer = createServer(app);
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.BASE_URL,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -99,5 +99,5 @@ const initApp = () => {
   });
 };
 
-export { httpServer }; // Export the HTTP server for use in app.ts
+export { app,httpServer }; // Export the HTTP server for use in app.ts
 export default initApp;
