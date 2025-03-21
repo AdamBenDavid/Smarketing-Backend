@@ -13,7 +13,10 @@ interface ConnectedUser {
 let connectedUsers: ConnectedUser[] = [];
 
 export const initializeSocket = (server: HTTPServer) => {
+  console.log('Initializing socket server...');
   const isProduction = process.env.NODE_ENV === 'production';
+  console.log('Environment:', process.env.NODE_ENV);
+  
   const io = new SocketIOServer(server, {
     cors: {
       origin: "*",
@@ -55,7 +58,7 @@ export const initializeSocket = (server: HTTPServer) => {
   });
 
   io.on('connection', async (socket) => {
-    
+    console.log('New client connected:', socket.id);
     // Add user to connected users list
     connectedUsers.push({
       userId: socket.data.userId,
@@ -197,6 +200,10 @@ export const initializeSocket = (server: HTTPServer) => {
       );
       io.emit('onlineUsers', onlineUsers);
     });
+  });
+
+  io.on('connect_error', (err) => {
+    console.log('Socket connection error:', err);
   });
 
   return io;
