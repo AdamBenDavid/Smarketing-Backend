@@ -10,7 +10,8 @@ interface ConnectedUser {
   socketId: string;
 }
 
-let connectedUsers: ConnectedUser[] = [];
+// Move connectedUsers to module scope but make it a Map for better performance
+const connectedUsers = new Map<string, string>(); // userId -> socketId
 
 export const initializeSocket = (server: HTTPServer) => {
   console.log('Initializing socket server...');
@@ -19,12 +20,13 @@ export const initializeSocket = (server: HTTPServer) => {
   
   const io = new SocketIOServer(server, {
     cors: {
-      origin: "*",
+      origin: isProduction ? 'https://node10.cs.colman.ac.il' : 'http://localhost:5173',
       methods: ["GET", "POST", "PUT", "DELETE"],
       credentials: true,
       allowedHeaders: ["Content-Type", "Authorization"]
     },
-    transports: isProduction ? ['polling'] : ['websocket', 'polling']
+    transports: ['polling', 'websocket'],
+    path: '/socket.io/'
   });
 
   if (isProduction) {
@@ -36,20 +38,24 @@ export const initializeSocket = (server: HTTPServer) => {
   }
 
   // Middleware to authenticate socket connections
-  io.use((socket, next) => {
+  io.use(async (socket, next) => {
     const token = socket.handshake.auth.token;
     if (!token) {
       return next(new Error('Authentication error - No token'));
     }
 
     try {
-      // Verify token without Bearer prefix
-      const decoded = jwt.verify(token, process.env.TOKEN_SECRET!) as { _id: string, random: string };
-      if (!decoded._id) {
-        return next(new Error('Authentication error - Invalid token payload'));
+      const cleanToken = token.replace('Bearer ', '');
+      const decoded = jwt.verify(cleanToken, process.env.TOKEN_SECRET!) as { _id: string };
+      
+      // Verify user exists in database
+      const user = await userModel.findById(decoded._id);
+      if (!user) {
+        return next(new Error('Authentication error - User not found'));
       }
       
       socket.data.userId = decoded._id;
+      socket.data.user = user;
       next();
     } catch (err) {
       console.error('[Socket] Auth error:', err);
@@ -59,32 +65,22 @@ export const initializeSocket = (server: HTTPServer) => {
 
   io.on('connection', async (socket) => {
     console.log('New client connected:', socket.id);
-    // Add user to connected users list
-    connectedUsers.push({
-      userId: socket.data.userId,
-      socketId: socket.id
+    const userId = socket.data.userId;
+    
+    // Add user to connected users
+    connectedUsers.set(userId, socket.id);
+    
+    // Update user's online status in database
+    await userModel.findByIdAndUpdate(userId, { 
+      online: true,
+      lastSeen: new Date()
     });
 
-    // Broadcast updated online users list to all clients
-    const onlineUserIds = connectedUsers.map(user => user.userId);
-    const onlineUsers = await userModel.find(
-      { _id: { $in: onlineUserIds } },
-      {
-        _id: 1,
-        email: 1,
-        fullName: 1,
-        profilePicture: 1,
-        role: 1,
-        expertise: 1,
-        online: 1,
-        lastSeen: 1
-      }
-    );
-    io.emit('onlineUsers', onlineUsers);
-
-    // Handle getOnlineUsers request
-    socket.on('getOnlineUsers', async () => {
-      const onlineUserIds = connectedUsers.map(user => user.userId);
+    // Broadcast updated online users list
+    const broadcastOnlineUsers = async () => {
+      const onlineUserIds = Array.from(connectedUsers.keys());
+      console.log('Online users:', onlineUserIds);
+      
       const onlineUsers = await userModel.find(
         { _id: { $in: onlineUserIds } },
         {
@@ -98,7 +94,17 @@ export const initializeSocket = (server: HTTPServer) => {
           lastSeen: 1
         }
       );
-      socket.emit('onlineUsers', onlineUsers);
+      
+      console.log('Broadcasting online users:', onlineUsers.length);
+      io.emit('onlineUsers', onlineUsers);
+    };
+
+    // Broadcast initial online users list
+    await broadcastOnlineUsers();
+
+    // Handle getOnlineUsers request
+    socket.on('getOnlineUsers', async () => {
+      await broadcastOnlineUsers();
     });
 
     // Handle chat history request
@@ -131,9 +137,9 @@ export const initializeSocket = (server: HTTPServer) => {
         await message.save();
 
         // Find recipient's socket if they're online
-        const recipientSocket = connectedUsers.find(user => user.userId === data.recipientId);
+        const recipientSocket = connectedUsers.get(data.recipientId);
         if (recipientSocket) {
-          io.to(recipientSocket.socketId).emit('new_message', {
+          io.to(recipientSocket).emit('new_message', {
             message,
             sender: socket.data.userId
           });
@@ -148,9 +154,9 @@ export const initializeSocket = (server: HTTPServer) => {
 
     // Handle typing status
     socket.on('typing', (data: { recipientId: string }) => {
-      const recipientSocket = connectedUsers.find(user => user.userId === data.recipientId);
+      const recipientSocket = connectedUsers.get(data.recipientId);
       if (recipientSocket) {
-        io.to(recipientSocket.socketId).emit('user_typing', {
+        io.to(recipientSocket).emit('user_typing', {
           userId: socket.data.userId
         });
       }
@@ -168,9 +174,9 @@ export const initializeSocket = (server: HTTPServer) => {
           { $set: { read: true } }
         );
 
-        const senderSocket = connectedUsers.find(user => user.userId === data.senderId);
+        const senderSocket = connectedUsers.get(data.senderId);
         if (senderSocket) {
-          io.to(senderSocket.socketId).emit('messages_read', {
+          io.to(senderSocket).emit('messages_read', {
             by: socket.data.userId
           });
         }
@@ -181,24 +187,19 @@ export const initializeSocket = (server: HTTPServer) => {
 
     // Handle disconnection
     socket.on('disconnect', async () => {
-      connectedUsers = connectedUsers.filter(user => user.socketId !== socket.id);
+      console.log('Client disconnected:', socket.id);
+      
+      // Remove user from connected users
+      connectedUsers.delete(userId);
+      
+      // Update user's online status and last seen
+      await userModel.findByIdAndUpdate(userId, {
+        online: false,
+        lastSeen: new Date()
+      });
       
       // Broadcast updated online users list
-      const onlineUserIds = connectedUsers.map(user => user.userId);
-      const onlineUsers = await userModel.find(
-        { _id: { $in: onlineUserIds } },
-        {
-          _id: 1,
-          email: 1,
-          fullName: 1,
-          profilePicture: 1,
-          role: 1,
-          expertise: 1,
-          online: 1,
-          lastSeen: 1
-        }
-      );
-      io.emit('onlineUsers', onlineUsers);
+      await broadcastOnlineUsers();
     });
   });
 
