@@ -266,7 +266,7 @@ router.put("/:id", authMiddleware, upload.single("image"), (req, res) => {
  *       500:
  *         description: Server error.
  */
-router.put("/like/:postId", authMiddleware, postsController.addLike);
+router.put("/like/:postId", postsController.addLike);
 
 /**
  * @swagger
@@ -305,6 +305,6 @@ router.put("/like/:postId", authMiddleware, postsController.addLike);
  *       500:
  *         description: Server error.
  */
-router.put("/unlike/:postId", authMiddleware, postsController.removeLike);
+router.put("/unlike/:postId", postsController.removeLike);
 
 export default router;

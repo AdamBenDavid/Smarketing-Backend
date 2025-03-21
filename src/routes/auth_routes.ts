@@ -128,7 +128,7 @@ router.post("/google", authController.googleSignin);
 //BF
 const loginLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  max: 5,
+  max: 40,
   message: {
     message: "יותר מדי ניסיונות כושלים. נסה שוב מאוחר יותר.",
   },

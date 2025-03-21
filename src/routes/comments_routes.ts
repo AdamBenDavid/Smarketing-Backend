@@ -67,7 +67,7 @@ import { authMiddleware } from "../controllers/auth_controller";
  *       500:
  *         description: Internal server error.
  */
-router.post("/", authMiddleware, commentsController.addComment);
+router.post("/", commentsController.addComment);
 
 /**
  * @swagger
@@ -126,7 +126,7 @@ router.get("/", commentsController.getAllComments);
  *       500:
  *         description: Internal server error.
  */
-router.put("/:id", authMiddleware, (req, res) => {
+router.put("/:id", (req, res) => {
   commentsController.updateCommentById(req, res);
 });
 
