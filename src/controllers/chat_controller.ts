@@ -8,8 +8,6 @@ const sendMessage = async (req: Request, res: Response) => {
   try {
     const { senderId, recipientId, content } = req.body;
 
-    console.log("senderId: " + senderId);
-    console.log("recipientId: " + recipientId);
 
     if (!mongoose.Types.ObjectId.isValid(recipientId)) {
       return res.status(400).json({ error: "Invalid recipient ID" });

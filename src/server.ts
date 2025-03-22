@@ -19,15 +19,12 @@ import path from "path";
 import helmet from "helmet";
 import { initializeSocket } from "./socket";
 
-console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
-console.log("DB_CONNECT:", process.env.DB_CONNECT);
 
 const app = express();
 const httpServer = http.createServer(app);
 
 const initApp = (): Promise<Express> => {
   const isProduction = process.env.NODE_ENV?.trim().toLowerCase() === 'production';
-  console.log(`Server initializing in ${isProduction ? 'production' : 'development'} mode`);
 
   // CORS configuration
   app.use(cors({
@@ -89,7 +86,6 @@ const initApp = (): Promise<Express> => {
         .then(() => {
           // Initialize Socket.IO after DB connection
           const io = initializeSocket(httpServer);
-          console.log('Socket.IO initialized');
           resolve(app);
         })
         .catch((error) => {

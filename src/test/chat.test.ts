@@ -31,8 +31,6 @@ beforeAll(async () => {
     profilePicture: null,
   });
 
-  console.log("Created sender:", sender._id.toString());
-  console.log("Created recipient:", recipient._id.toString());
 
   senderToken = jwt.sign({ _id: sender._id }, process.env.TOKEN_SECRET!, {
     expiresIn: "1h",

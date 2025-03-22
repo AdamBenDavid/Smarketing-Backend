@@ -14,9 +14,7 @@ interface ConnectedUser {
 const connectedUsers = new Map<string, string>(); // userId -> socketId
 
 export const initializeSocket = (server: HTTPServer) => {
-  console.log('Initializing socket server...');
   const isProduction = process.env.NODE_ENV === 'production';
-  console.log('Environment:', process.env.NODE_ENV);
   
   const io = new SocketIOServer(server, {
     cors: {
@@ -64,7 +62,6 @@ export const initializeSocket = (server: HTTPServer) => {
   });
 
   io.on('connection', async (socket) => {
-    console.log('New client connected:', socket.id);
     const userId = socket.data.userId;
     
     // Add user to connected users
@@ -79,8 +76,6 @@ export const initializeSocket = (server: HTTPServer) => {
     // Broadcast updated online users list
     const broadcastOnlineUsers = async () => {
       const onlineUserIds = Array.from(connectedUsers.keys());
-      console.log('Online users:', onlineUserIds);
-      
       const onlineUsers = await userModel.find(
         { _id: { $in: onlineUserIds } },
         {
@@ -95,7 +90,6 @@ export const initializeSocket = (server: HTTPServer) => {
         }
       );
       
-      console.log('Broadcasting online users:', onlineUsers.length);
       io.emit('onlineUsers', onlineUsers);
     };
 
@@ -187,7 +181,6 @@ export const initializeSocket = (server: HTTPServer) => {
 
     // Handle disconnection
     socket.on('disconnect', async () => {
-      console.log('Client disconnected:', socket.id);
       
       // Remove user from connected users
       connectedUsers.delete(userId);
@@ -204,7 +197,6 @@ export const initializeSocket = (server: HTTPServer) => {
   });
 
   io.on('connect_error', (err) => {
-    console.log('Socket connection error:', err);
   });
 
   return io;

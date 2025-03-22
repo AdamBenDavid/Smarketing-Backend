@@ -22,7 +22,6 @@ export const authenticateToken = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        console.log("Authenticating token");
         
         // Get token from Authorization header
         const authHeader = req.headers.authorization;
@@ -31,7 +30,6 @@ export const authenticateToken = async (
             : null;
         
         if (!token) {
-            console.log("No token found");
             res.status(401).json({ message: "No token provided" });
             return;
         }
@@ -42,19 +40,16 @@ export const authenticateToken = async (
             return;
         }
 
-        console.log("Token found, verifying...");
         
         const decoded = jwt.verify(token, process.env.JWT_SECRET) as TokenPayload;
         
         const user = await UseuserModel.findById(decoded._id);
         
         if (!user) {
-            console.log("User not found");
             res.status(401).json({ message: "User not found" });
             return;
         }
 
-        console.log("User authenticated:", user._id);
         
         req.user = user;
         next();

@@ -43,7 +43,6 @@ const googleSignin = async (req: Request, res: Response): Promise<void> => {
   }
 
   try {
-    console.log("Verifying Google ID token...");
     const ticket = await client.verifyIdToken({
       idToken: credential,
       audience: process.env.GOOGLE_CLIENT_ID,
@@ -63,7 +62,6 @@ const googleSignin = async (req: Request, res: Response): Promise<void> => {
     if (!user) {
       const randomPassword = crypto.randomBytes(16).toString("hex");
 
-      console.log("Creating new user...");
       user = await userModel.create({
         email: email,
         password: randomPassword,

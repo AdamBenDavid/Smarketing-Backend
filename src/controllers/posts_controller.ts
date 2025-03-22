@@ -270,7 +270,6 @@ export const deletePostById = async (
 
       try {
         await fs.promises.unlink(imagePath);
-        console.log("Image deleted successfully:", post.image);
       } catch (err) {
         console.error("Failed to delete image:", err);
       }
