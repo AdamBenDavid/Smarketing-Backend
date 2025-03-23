@@ -101,7 +101,6 @@ const initApp = (): Promise<Express> => {
           resolve(app);
         })
         .catch((error) => {
-          console.error('MongoDB connection error:', error);
           reject(error);
         });
     }

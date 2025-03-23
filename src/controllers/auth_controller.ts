@@ -30,7 +30,6 @@ const saveGoogleProfileImage = async (
     fs.writeFileSync(fullPath, response.data);
     return imagePath;
   } catch (error) {
-    console.error("Failed to save Google profile image");
     return null;
   }
 };
@@ -51,7 +50,6 @@ const googleSignin = async (req: Request, res: Response): Promise<void> => {
     const payload = ticket.getPayload();
 
     if (!payload || !payload.email) {
-      console.error("Invalid Google token or missing email in payload");
       res.status(400).send("Invalid Google token");
       return;
     }
@@ -113,7 +111,6 @@ const googleSignin = async (req: Request, res: Response): Promise<void> => {
       accessToken: tokens.accessToken,
     });
   } catch (err: any) {
-    console.error("Google Sign-in Error");
     res.status(400).send({ message: err.message });
   }
 };
@@ -272,7 +269,6 @@ const verifyRefreshToken = (refreshToken: string | undefined) => {
       process.env.TOKEN_SECRET,
       async (err: any, payload: any) => {
         if (err) {
-          console.error("Invalid refresh token:", err);
           reject("fail");
           return;
         }
@@ -298,7 +294,6 @@ const verifyRefreshToken = (refreshToken: string | undefined) => {
 
           resolve(user);
         } catch (err) {
-          console.error("Database error");
           reject("fail");
         }
       }
@@ -389,7 +384,6 @@ export const authMiddleware = (
 
 const updateProfile = async (req: Request, res: Response): Promise<void> => {
   try {
-    log("Updating profile...");
     const userId = req.params.id;
 
     if (!mongoose.Types.ObjectId.isValid(userId)) {

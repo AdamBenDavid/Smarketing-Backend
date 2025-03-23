@@ -56,7 +56,6 @@ export const initializeSocket = (server: HTTPServer) => {
       socket.data.user = user;
       next();
     } catch (err) {
-      console.error('[Socket] Auth error:', err);
       next(new Error('Authentication error - Invalid token'));
     }
   });
@@ -175,7 +174,6 @@ export const initializeSocket = (server: HTTPServer) => {
           });
         }
       } catch (error) {
-        console.error('Error marking messages as read:', error);
       }
     });
 

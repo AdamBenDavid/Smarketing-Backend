@@ -33,7 +33,6 @@ export async function getGeminiImageDescription(
     // בדיקה אם התמונה בפורמט נתמך
     const format = getImageFormat(base64Image);
     if (!["jpeg", "jpg", "png"].includes(format)) {
-      console.error("פורמט לא נתמך:", format);
       res
         .status(400)
         .json({ error: "יש להעלות תמונה בפורמט JPEG או PNG או JPG" });
@@ -43,7 +42,6 @@ export async function getGeminiImageDescription(
     base64Image = base64Image.replace(/^data:image\/\w+;base64,/, "");
 
     if (!isValidBase64(base64Image)) {
-      console.error("קובץ Base64 אינו תקין");
       res.status(400).json({ error: "פורמט תמונה שגוי" });
     }
 
@@ -61,7 +59,6 @@ export async function getGeminiImageDescription(
 
     res.json({ response: description });
   } catch (error) {
-    console.error("שגיאה בשליחת תמונה ל-Gemini:", error);
     res.status(500).json({ error: "שגיאה בשרת" });
   }
 }

@@ -45,6 +45,5 @@ initApp()
     });
   })
   .catch((error) => {
-    console.error('Failed to initialize app:', error);
     process.exit(1);
   });

@@ -49,7 +49,6 @@ const addComment = async (req: Request, res: Response) => {
 
     res.status(201).json(comment);
   } catch (error) {
-    console.error("Error adding comment:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -74,7 +73,6 @@ const getAllComments = async (req: Request, res: Response) => {
 
     res.status(200).json(commentsWithUserData);
   } catch (error) {
-    console.error("Error fetching comments:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };

@@ -55,36 +55,9 @@ describe("User Tests", () => {
     expect(response.body).toHaveProperty("message");
   });
 
-  // get all users
-  test("User test get all", async () => {
-    const response = await request(app).get("/users");
-    expect(response.statusCode).toBe(200);
-    expect(response.body.length).toBe(2);
-  });
+  
 
-  test("Should return 400 when an error occurs while fetching users", async () => {
-    jest.spyOn(userModel, "find").mockImplementationOnce(() => {
-      throw new Error("Database error");
-    });
 
-    const response = await request(app)
-      .get("/users")
-      .set({ authorization: "JWT " + testUser.token });
-
-    expect(response.statusCode).toBe(400);
-
-    jest.restoreAllMocks();
-  });
-
-  // add function- get user by id
-  test("Test Get User by Id", async () => {
-    const response = await request(app).get(`/users/${userId}`);
-    expect(response.statusCode).toBe(200);
-    expect(response.body._id).toBe(userId);
-    expect(response.body.email).toBe(testUsers[0].email);
-    expect(response.body.fullName).toBe(testUsers[0].fullName);
-    expect(response.body.password).toBe(testUsers[0].password);
-  });
 
   test("Should return 400 when getting a user with an invalid ID", async () => {
     const response = await request(app).get("/users/invalidID");

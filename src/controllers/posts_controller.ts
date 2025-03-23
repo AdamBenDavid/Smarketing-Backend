@@ -102,7 +102,6 @@ const updatePostById = async (req: Request, res: Response) => {
         try {
           await fs.promises.unlink(oldImagePath);
         } catch (err) {
-          console.error("Error deleting old post image:", err);
         }
       }
 
@@ -224,7 +223,6 @@ const deletePosts = async (req: Request, res: Response) => {
           return new Promise((resolve, reject) => {
             fs.unlink(imagePath, (err) => {
               if (err) {
-                console.error(`Failed to delete image: ${post.image}`, err);
                 reject(err);
               } else {
                 resolve(true);
@@ -241,7 +239,6 @@ const deletePosts = async (req: Request, res: Response) => {
       deletedPosts,
     });
   } catch (error) {
-    console.error("Error deleting posts and images:", error);
     res.status(500).json({ error: "Internal server error", details: error });
   }
 };
@@ -271,7 +268,6 @@ export const deletePostById = async (
       try {
         await fs.promises.unlink(imagePath);
       } catch (err) {
-        console.error("Failed to delete image:", err);
       }
     }
 
@@ -283,7 +279,6 @@ export const deletePostById = async (
 
     res.status(200).json({ message: "✅ Post deleted successfully" });
   } catch (error) {
-    console.error("❌ Error deleting post:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };

@@ -35,7 +35,6 @@ export const authenticateToken = async (
         }
 
         if (!process.env.JWT_SECRET) {
-            console.error("JWT_SECRET not configured");
             res.status(500).json({ message: "Server configuration error" });
             return;
         }
@@ -54,7 +53,6 @@ export const authenticateToken = async (
         req.user = user;
         next();
     } catch (error) {
-        console.error("Auth middleware error:", error);
         res.status(401).json({ message: "Invalid token" });
     }
 }; 

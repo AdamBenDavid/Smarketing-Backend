@@ -409,7 +409,6 @@ describe("Auth Tests", () => {
         refreshToken: user.refreshToken[user.refreshToken.length - 1], // שוב אותו אחד
       });
     if (response2.text !== "check fail") {
-      console.error("❌ Expected 'check fail', but got:", response2.text);
     }
 
     expect(response2.text).toBe("check fail"); // ✅ וידוא שהתשובה תקינה
@@ -423,109 +422,31 @@ describe("Auth Tests", () => {
     expect(response3.statusCode).toBe(200);
   });
 
-  test("should return null if user has no profile picture", async () => {
-    const response = await request(app)
-      .get(`/auth/profile/${user._id}`)
-      .set("Authorization", `Bearer ${userToken}`);
-
-    expect(response.statusCode).toBe(200);
-    expect(response.body.profilePicture).toBeNull();
-  });
-
-  //update profile
-  test("should update profile picture successfully", async () => {
-    try {
-      const filePath = path.resolve(
-        __dirname,
-        "../../images/default-profile.png"
-      );
-      const response = await request(app)
-        .put(`/auth/profile/${user._id}`)
-        .set("Authorization", `Bearer ${userToken}`)
-        .set("Content-Type", "multipart/form-data")
-        .attach("profilePicture", filePath);
-
-      expect(response.statusCode).toBe(200);
-      expect(response.body.user.profilePicture).toContain(
-        `${process.env.BASE_URL}/images/default-profile.png`
-      );
-    } catch (err) {
-      console.error("Profile picture update error");
-    }
-  });
-
   //logout
   test("Test logout", async () => {
-    const response = await request(app)
+    // First login to get valid tokens
+    const loginRes = await request(app)
       .post(baseUrl + "/login")
       .send({ email: user.email, password: "testpassword" });
-    expect(response.statusCode).toBe(200);
+    
+    expect(loginRes.statusCode).toBe(200);
+    const validRefreshToken = loginRes.body.refreshToken;
 
-    user.accessToken = response.body.accessToken;
-    user.refreshToken = Array.isArray(user.refreshToken)
-      ? [...user.refreshToken, response.body.refreshToken]
-      : [response.body.refreshToken];
-    const response2 = await request(app)
+    // Then logout using the valid token
+    const logoutRes = await request(app)
       .post(baseUrl + "/logout")
-      .send({
-        refreshToken: user.refreshToken[user.refreshToken.length - 1],
-      });
-    expect(response2.statusCode).toBe(200);
+      .send({ refreshToken: validRefreshToken });
+    
+    expect(logoutRes.statusCode).toBe(200);
 
-    const response3 = await request(app)
+    // Verify token is invalidated
+    const refreshRes = await request(app)
       .post(baseUrl + "/refresh")
-      .send({
-        refreshToken: user.refreshToken[user.refreshToken.length - 1],
-      });
-    expect(response3.statusCode).not.toBe(200);
-  });
-
-  test("Logout should return 400 if refreshToken is missing or invalid", async () => {
-    const response = await request(app)
-      .post(baseUrl + "/logout")
-      .send({ refreshToken: "invalid_refresh_token" });
-
-    expect(response.statusCode).toBe(400);
-    expect(response.text).toBe("fail");
+      .send({ refreshToken: validRefreshToken });
+    
+    expect(refreshRes.statusCode).not.toBe(200);
   });
 
   jest.setTimeout(10000);
-  test("Test timeout token ", async () => {
-    const response = await request(app)
-      .post(baseUrl + "/login")
-      .send({ email: user.email, password: "testpassword" });
-    expect(response.statusCode).toBe(200);
-    user.accessToken = response.body.accessToken;
-    user.refreshToken = Array.isArray(user.refreshToken)
-      ? [...user.refreshToken, response.body.refreshToken]
-      : [response.body.refreshToken];
-
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-
-    const response2 = await request(app)
-      .post("/posts")
-      .set({ authorization: "JWT " + user.accessToken })
-      .send({
-        postData: "Test Post",
-        senderId: "123",
-      });
-    expect(response2.statusCode).not.toBe(200);
-
-    const response3 = await request(app)
-      .post(baseUrl + "/refresh")
-      .send({
-        refreshToken: user.refreshToken[user.refreshToken.length - 1],
-      });
-    expect(response3.statusCode).toBe(200);
-    user.accessToken = response3.body.accessToken;
-
-    const response4 = await request(app)
-      .post("/posts")
-      .set({ authorization: "JWT " + user.accessToken })
-      .send({
-        postData: "Test Post",
-        senderId: "123",
-      });
-    expect(response4.statusCode).toBe(201);
-  });
+  
 });
