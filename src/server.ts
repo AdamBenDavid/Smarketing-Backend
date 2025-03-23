@@ -28,9 +28,9 @@ const initApp = (): Promise<Express> => {
 
   // CORS configuration
   app.use(cors({
-    origin: isProduction ? 'https://node10.cs.colman.ac.il' : 'http://localhost:5173',
+    origin: isProduction ? 'https://node10.cs.colman.ac.il' : ['http://localhost:5173', 'http://localhost:3000'],
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
   }));
 
@@ -70,12 +70,24 @@ const initApp = (): Promise<Express> => {
         version: "1.0.0",
         description: "REST server including authentication using JWT",
       },
-      servers: [{ url: process.env.BASE_URL }],
+      servers: [
+        {
+          url: isProduction 
+            ? 'https://node10.cs.colman.ac.il' 
+            : 'http://localhost:3000',
+          description: isProduction ? 'Production server' : 'Development server'
+        }
+      ],
     },
     apis: ["./src/routes/*.ts"],
   };
   const specs = swaggerJsDoc(options);
   app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
+
+  // Add a redirect from root to api-docs
+  app.get('/', (req, res) => {
+    res.redirect('/api-docs');
+  });
 
   return new Promise<Express>((resolve, reject) => {
     if (!process.env.DB_CONNECT) {
