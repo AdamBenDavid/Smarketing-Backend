@@ -70,59 +70,59 @@ const router = express.Router();
 
 router.post("/register", authController.register);
 
-/**
- * @swagger
- * /auth/google:
- *   post:
- *     summary: Google Sign-In
- *     description: Authenticate user using Google OAuth and return tokens
- *     tags:
- *       - Auth
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               credential:
- *                 type: string
- *                 description: Google credential token
- *                 example: ya29.a0AfH6SM...
- *     responses:
- *       200:
- *         description: Successful login via Google
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 accessToken:
- *                   type: string
- *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
- *                 refreshToken:
- *                   type: string
- *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
- *                 user:
- *                   type: object
- *                   properties:
- *                     _id:
- *                       type: string
- *                       example: 60d0fe4f5311236168a109ca
- *                     email:
- *                       type: string
- *                       example: user@gmail.com
- *                     fullName:
- *                       type: string
- *                       example: John Doe
- *                     profilePicture:
- *                       type: string
- *                       example: https://lh3.googleusercontent.com/a-/AOh14...
- *       400:
- *         description: Invalid Google credential
- *       500:
- *         description: Server error
- */
+// /**
+//  * @swagger
+//  * /auth/google:
+//  *   post:
+//  *     summary: Google Sign-In
+//  *     description: Authenticate user using Google OAuth and return tokens
+//  *     tags:
+//  *       - Auth
+//  *     requestBody:
+//  *       required: true
+//  *       content:
+//  *         application/json:
+//  *           schema:
+//  *             type: object
+//  *             properties:
+//  *               credential:
+//  *                 type: string
+//  *                 description: Google credential token
+//  *                 example: ya29.a0AfH6SM...
+//  *     responses:
+//  *       200:
+//  *         description: Successful login via Google
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 accessToken:
+//  *                   type: string
+//  *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+//  *                 refreshToken:
+//  *                   type: string
+//  *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+//  *                 user:
+//  *                   type: object
+//  *                   properties:
+//  *                     _id:
+//  *                       type: string
+//  *                       example: 60d0fe4f5311236168a109ca
+//  *                     email:
+//  *                       type: string
+//  *                       example: user@gmail.com
+//  *                     fullName:
+//  *                       type: string
+//  *                       example: John Doe
+//  *                     profilePicture:
+//  *                       type: string
+//  *                       example: https://lh3.googleusercontent.com/a-/AOh14...
+//  *       400:
+//  *         description: Invalid Google credential
+//  *       500:
+//  *         description: Server error
+//  */
 router.post("/google", authController.googleSignin);
 
 //BF
@@ -257,6 +257,16 @@ router.post("/logout", authController.logout);
  *         schema:
  *           type: string
  *         description: The user ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               profilePicture:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       200:
  *         description: Profile updated successfully
@@ -272,7 +282,7 @@ router.put(
  * @swagger
  * /auth/profile/{id}:
  *   get:
- *     summary: Get user profile by ID
+ *     summary: Get user by ID
  *     tags: [Auth]
  *     security:
  *       - bearerAuth: []
@@ -293,7 +303,7 @@ router.get("/profile/:id", authMiddleware, authController.getUserById);
  * @swagger
  * /auth/user/{id}:
  *   get:
- *     summary: Get user details by ID
+ *     summary: Get user by ID
  *     tags: [Auth]
  *     parameters:
  *       - in: path
@@ -311,7 +321,7 @@ router.get("/user/:id", authController.getUserById);
 //route to check middleware
 /**
  * @swagger
- * /protected-route:
+ * /auth/protected-route:
  *   get:
  *     summary: Example protected route
  *     security:
@@ -325,5 +335,4 @@ router.get("/user/:id", authController.getUserById);
 router.get("/protected-route", authMiddleware, (req, res) => {
   res.status(200).send("You have access!");
 });
-
 export default router;

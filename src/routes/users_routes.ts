@@ -27,30 +27,30 @@ import { authMiddleware } from "../controllers/auth_controller";
  *                 $ref: '#/components/schemas/User'
  */
 
-//router.get("/", usersController.getAllUsers);
+router.get("/", usersController.getAllUsers);
 
-/**
- * @swagger
- * /users:
- *   post:
- *     summary: Create a new user
- *     tags: [Users]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/User'
- *     responses:
- *       201:
- *         description: User created successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
- */
+// /**
+//  * @swagger
+//  * /users:
+//  *   post:
+//  *     summary: Create a new user
+//  *     tags: [Users]
+//  *     requestBody:
+//  *       required: true
+//  *       content:
+//  *         application/json:
+//  *           schema:
+//  *             $ref: '#/components/schemas/User'
+//  *     responses:
+//  *       201:
+//  *         description: User created successfully
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               $ref: '#/components/schemas/User'
+//  */
 
-router.post("/", usersController.createUser);
+// router.post("/", usersController.createUser);
 
 /**
  * @swagger
