@@ -101,8 +101,7 @@ const updatePostById = async (req: Request, res: Response) => {
       if (oldImagePath && fs.existsSync(oldImagePath)) {
         try {
           await fs.promises.unlink(oldImagePath);
-        } catch (err) {
-        }
+        } catch (err) {}
       }
 
       image = newImagePath;
@@ -267,8 +266,7 @@ export const deletePostById = async (
 
       try {
         await fs.promises.unlink(imagePath);
-      } catch (err) {
-      }
+      } catch (err) {}
     }
 
     const deletedPost = await postModel.findByIdAndDelete(postId);
@@ -277,7 +275,7 @@ export const deletePostById = async (
       return;
     }
 
-    res.status(200).json({ message: "✅ Post deleted successfully" });
+    res.status(200).json({ message: "Post deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }

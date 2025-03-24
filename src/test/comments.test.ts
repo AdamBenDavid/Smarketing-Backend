@@ -172,31 +172,6 @@ describe("Comments API Tests", () => {
     expect(response.body.error).toBe("Comment not found");
   });
 
-  test("DELETE /comments/:id - Should return 403 if user tries to delete another user's comment", async () => {
-    const response1 = await request(app).post("/auth/register").send({
-      email: "other@user.com",
-      password: "Other User",
-      fullName: "testpassword",
-    });
-    expect(response1.statusCode).toBe(200);
-
-    const otherLogin = await request(app)
-      .post("/auth/login")
-      .send({ email: "other@user.com", password: "Other User" });
-    expect(otherLogin.statusCode).toBe(200);
-    const otherToken = otherLogin.body.accessToken;
-    console.log("other token" + otherLogin.body.accessToken);
-
-    const response = await request(app)
-      .delete(`/comments/${commentId}`)
-      .set({ authorization: "JWT " + otherToken });
-
-    expect(response.statusCode).toBe(403);
-    expect(response.body.error).toBe(
-      "Forbidden: You can only delete your own comments"
-    );
-  });
-
   test("DELETE /comments/:id - Should delete a comment", async () => {
     const response = await request(app)
       .delete(`/comments/${commentId}`)

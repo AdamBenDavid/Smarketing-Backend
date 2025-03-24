@@ -111,15 +111,31 @@ const updateCommentById = async (req: Request, res: Response) => {
   }
 };
 
+import jwt from "jsonwebtoken";
+
 const deleteCommentById = async (req: Request, res: Response) => {
   try {
     const commentId = req.params.commentId;
-    const userIdFromToken = req.params.userId || req.body.userId;
 
+    // ✅ שלב 1: חילוץ הטוקן מהכותרת
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(" ")[1]; // "JWT <token>"
+
+    if (!token || !process.env.TOKEN_SECRET) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    // ✅ שלב 2: פענוח הטוקן
+    const decoded = jwt.verify(token, process.env.TOKEN_SECRET) as {
+      _id: string;
+    };
+
+    const userIdFromToken = decoded._id;
+
+    // ✅ שלב 3: המשך כמו קודם
     const comment = await commentsModel.findById(commentId);
     if (!comment) {
-      res.status(404).json({ error: "Comment not found" });
-      return;
+      return res.status(404).json({ error: "Comment not found" });
     }
 
     if (comment.userId.toString() !== userIdFromToken) {
@@ -128,15 +144,14 @@ const deleteCommentById = async (req: Request, res: Response) => {
       });
     }
 
-    const updatedPost = await postModel.findOneAndUpdate(
+    await postModel.findOneAndUpdate(
       { _id: comment.postId },
       { $pull: { comments: commentId } },
       { new: true }
     );
 
     await commentsModel.findByIdAndDelete(commentId);
-    res.status(200).json({ message: "Comment deleted successfully" });
-    return;
+    return res.status(200).json({ message: "Comment deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
