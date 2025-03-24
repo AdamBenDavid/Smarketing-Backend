@@ -174,9 +174,11 @@ describe("Auth Tests", () => {
 
   //login
   test("Auth test login", async () => {
+    console.log("test user login:" + user.email + " " + "testpassword");
     const response = await request(app)
       .post(baseUrl + "/login")
       .send({ email: user.email, password: "testpassword" });
+    console.log("response:" + response.text);
     expect(response.statusCode).toBe(200);
     const accessToken = response.body.accessToken;
     const refreshToken = response.body.refreshToken;
@@ -314,6 +316,7 @@ describe("Auth Tests", () => {
       .put(baseUrl + `/profile/${validNonExistingUserId}`)
       .set("Authorization", `Bearer ${userToken}`)
       .send({ fullName: "Updated Name" });
+    console.log("response update:" + response.text);
     expect(response.statusCode).toBe(404);
     expect(response.body.message).toBe("User not found");
   });
@@ -323,6 +326,7 @@ describe("Auth Tests", () => {
       .put(baseUrl + `/profile/notValid`)
       .set("Authorization", `Bearer ${userToken}`)
       .send({ fullName: "Updated Name" });
+    console.log("response update:" + response.text);
     expect(response.statusCode).toBe(400);
     expect(response.body.message).toBe("Invalid user ID");
   });
@@ -377,11 +381,15 @@ describe("Auth Tests", () => {
       throw new Error("User not found or refreshToken is missing");
     }
 
+    console.log("🔹 Using stored refreshToken:", tempUser.refreshToken);
+
     const response = await request(app)
       .post(baseUrl + "/refresh")
       .send({
         refreshToken: tempUser.refreshToken[tempUser.refreshToken.length - 1],
       });
+
+    console.log("🔹 Server Response:", response.body); // 🔍
 
     expect(response.statusCode).toBe(200);
     expect(response.body.accessToken).toBeDefined();
@@ -394,6 +402,12 @@ describe("Auth Tests", () => {
   });
 
   test("Double use refresh token", async () => {
+    console.log(
+      "🔹 Checking stored refreshTokens before first request:",
+      user.refreshToken
+    );
+
+    // 🔹 שליחת בקשה ראשונה לרענון טוקן
     const response = await request(app)
       .post(baseUrl + "/refresh")
       .send({
@@ -403,12 +417,21 @@ describe("Auth Tests", () => {
     expect(response.statusCode).toBe(200);
     const refreshTokenNew = response.body.refreshToken;
 
+    console.log("🔹 New refreshToken:", refreshTokenNew);
+
+    // 🔹 ניסיון להשתמש שוב ב-Refresh Token הישן
+    console.log("🔹 Trying to reuse old refresh token...");
     const response2 = await request(app)
       .post(baseUrl + "/refresh")
       .send({
         refreshToken: user.refreshToken[user.refreshToken.length - 1], // שוב אותו אחד
       });
+
+    console.log("🔹 Second refresh token response:", response2.body);
+
+    // 🛑 בדיקה מחודשת לוודא שהטוקן הישן לא מתקבל
     if (response2.text !== "check fail") {
+      console.error("❌ Expected 'check fail', but got:", response2.text);
     }
 
     expect(response2.text).toBe("check fail"); // ✅ וידוא שהתשובה תקינה
@@ -419,34 +442,126 @@ describe("Auth Tests", () => {
       .send({
         refreshToken: refreshTokenNew, // שולחים את ה-Refresh Token החדש
       });
+
+    console.log("🔹 Third refresh token response:", response3.body);
+
+    // ✅ אמור לעבוד כי זה הטוקן החדש
     expect(response3.statusCode).toBe(200);
+  });
+
+  test("should return null if user has no profile picture", async () => {
+    const response = await request(app)
+      .get(`/auth/profile/${user._id}`)
+      .set("Authorization", `Bearer ${userToken}`);
+
+    expect(response.statusCode).toBe(200);
+    console.log("response.fullname:" + response.body.fullName);
+    console.log("response.profilePicture:" + response.body.profilePicture);
+
+    expect(response.body.profilePicture).toBeNull();
+  });
+
+  //update profile
+  test("should update profile picture successfully", async () => {
+    console.log("🔹 Start update profile picture test");
+    console.log("🔹 Test user ID:", user._id.toString());
+
+    const filePath = path.resolve(
+      __dirname,
+      "../../images/default-profile.png" //random picture
+    );
+    console.log("File path:", filePath);
+
+    const response = await request(app)
+      .put(`/auth/profile/${user._id}`)
+      .set("Authorization", `Bearer ${userToken}`)
+      .set("Content-Type", "multipart/form-data")
+      .attach("profilePicture", filePath);
+
+    console.log("🔹 Server response:", response.body);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.user.profilePicture).toContain(
+      "http://localhost:3000/uploads/profile_pictures/"
+    );
   });
 
   //logout
   test("Test logout", async () => {
-    // First login to get valid tokens
-    const loginRes = await request(app)
+    const response = await request(app)
       .post(baseUrl + "/login")
       .send({ email: user.email, password: "testpassword" });
-    
-    expect(loginRes.statusCode).toBe(200);
-    const validRefreshToken = loginRes.body.refreshToken;
+    expect(response.statusCode).toBe(200);
 
-    // Then logout using the valid token
-    const logoutRes = await request(app)
+    user.accessToken = response.body.accessToken;
+    user.refreshToken = Array.isArray(user.refreshToken)
+      ? [...user.refreshToken, response.body.refreshToken]
+      : [response.body.refreshToken];
+    console.log("🔹 User refreshToken:", user.refreshToken);
+    console.log("🔹 User accessToken:", user.accessToken);
+    console.log("line 502");
+    const response2 = await request(app)
       .post(baseUrl + "/logout")
-      .send({ refreshToken: validRefreshToken });
-    
-    expect(logoutRes.statusCode).toBe(200);
+      .send({
+        refreshToken: user.refreshToken[user.refreshToken.length - 1],
+      });
+    expect(response2.statusCode).toBe(200);
 
-    // Verify token is invalidated
-    const refreshRes = await request(app)
+    const response3 = await request(app)
       .post(baseUrl + "/refresh")
-      .send({ refreshToken: validRefreshToken });
-    
-    expect(refreshRes.statusCode).not.toBe(200);
+      .send({
+        refreshToken: user.refreshToken[user.refreshToken.length - 1],
+      });
+    expect(response3.statusCode).not.toBe(200);
+  });
+
+  test("Logout should return 400 if refreshToken is missing or invalid", async () => {
+    console.log("line 518");
+    const response = await request(app)
+      .post(baseUrl + "/logout")
+      .send({ refreshToken: "invalid_refresh_token" }); // שולחים טוקן לא תקין
+
+    expect(response.statusCode).toBe(400);
+    expect(response.text).toBe("fail"); // לוודא שהשרת מחזיר הודעת שגיאה מתאימה
   });
 
   jest.setTimeout(10000);
-  
+  test("Test timeout token ", async () => {
+    const response = await request(app)
+      .post(baseUrl + "/login")
+      .send({ email: user.email, password: "testpassword" });
+    expect(response.statusCode).toBe(200);
+    user.accessToken = response.body.accessToken;
+    user.refreshToken = Array.isArray(user.refreshToken)
+      ? [...user.refreshToken, response.body.refreshToken]
+      : [response.body.refreshToken];
+
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+
+    const response2 = await request(app)
+      .post("/posts")
+      .set({ authorization: "JWT " + user.accessToken })
+      .send({
+        postData: "Test Post",
+        senderId: "123",
+      });
+    expect(response2.statusCode).not.toBe(200);
+
+    const response3 = await request(app)
+      .post(baseUrl + "/refresh")
+      .send({
+        refreshToken: user.refreshToken[user.refreshToken.length - 1],
+      });
+    expect(response3.statusCode).toBe(200);
+    user.accessToken = response3.body.accessToken;
+
+    const response4 = await request(app)
+      .post("/posts")
+      .set({ authorization: "JWT " + user.accessToken })
+      .send({
+        postData: "Test Post",
+        senderId: "123",
+      });
+    expect(response4.statusCode).toBe(201);
+  });
 });

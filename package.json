@@ -43,17 +43,15 @@
   },
   "scripts": {
     "nodemon": "nodemon server.js",
-    "test": "jest --detectOpenHandles --forceExit --verbose",
-    "test:auth": "jest src/test/auth.test.ts --detectOpenHandles --forceExit --verbose",
-    "test:chat": "jest src/test/chat.test.ts --detectOpenHandles --forceExit --verbose",
-    "test:posts": "jest src/test/posts.test.ts --detectOpenHandles --forceExit --verbose",
-    "test:users": "jest src/test/users.test.ts --detectOpenHandles --forceExit --verbose",
-    "test:comments": "jest src/test/comments.test.ts --detectOpenHandles --forceExit --verbose",
+    "test": "rm -rf dist && cp .env_test .env && tsc && jest --detectOpenHandles --forceExit --verbose",
+    "test:auth": "cp .env_test .env && tsc && jest src/test/auth.test.ts --detectOpenHandles --forceExit --verbose",
+    "test:chat": "cp .env_test .env && tsc && jest src/test/chat.test.ts --detectOpenHandles --forceExit --verbose",
+    "test:posts": "cp .env_test .env && tsc && jest src/test/posts.test.ts --detectOpenHandles --forceExit --verbose",
+    "test:users": "cp .env_test .env && tsc && jest src/test/users.test.ts --detectOpenHandles --forceExit --verbose",
+    "test:comments": "cp .env_test .env && tsc && jest src/test/comments.test.ts --detectOpenHandles --forceExit --verbose",
     "dev": "cp .env_dev .env && nodemon ./src/app.ts",
     "dev_win": "copy .env_dev .env && nodemon ./src/app.ts",
-
     "production": "cp .env_prod .env && nodemon ./src/app.ts",
-
     "prod": "cp .env_prod .env &&  NODE_ENV=production && npm run build && npm run start",
     "lint": "eslint . --ext .ts",
     "test:coverage": "jest --coverage",
