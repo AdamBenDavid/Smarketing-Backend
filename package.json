@@ -43,7 +43,7 @@
   },
   "scripts": {
     "nodemon": "nodemon server.js",
-    "test": "jest --detectOpenHandles --forceExit --verbose",
+    "test": "cp .env_test .env && tsc && jest --detectOpenHandles --forceExit --verbose",
     "test:auth": "jest src/test/auth.test.ts --detectOpenHandles --forceExit --verbose",
     "test:chat": "jest src/test/chat.test.ts --detectOpenHandles --forceExit --verbose",
     "test:posts": "jest src/test/posts.test.ts --detectOpenHandles --forceExit --verbose",
