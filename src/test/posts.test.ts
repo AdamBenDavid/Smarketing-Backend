@@ -13,26 +13,24 @@ type newUser = User & { token?: string };
 const baseUrl = "/posts";
 
 beforeAll(async () => {
-  try {
-    app = await initApp();
-    await postModel.deleteMany();
-    await userModel.deleteMany();
+  app = await initApp();
+  await postModel.deleteMany();
+  await userModel.deleteMany();
 
-    testUser = await userModel.create({
-      _id: new mongoose.Types.ObjectId(),
-      email: "test1@user.com",
-      fullName: "dog",
-      password: "testpassword",
-      profilePicture: null,
-    });
+  testUser = await userModel.create({
+    _id: new mongoose.Types.ObjectId(),
+    email: "test1@user.com",
+    fullName: "dog",
+    password: "testpassword",
+    profilePicture: null,
+  });
 
-    userToken = jwt.sign({ _id: testUser._id }, process.env.TOKEN_SECRET!, {
-      expiresIn: "1h",
-    });
-  } catch (error) {
-    console.error("Test setup failed:", error);
-    throw error;
-  }
+  userToken = jwt.sign({ _id: testUser._id }, process.env.TOKEN_SECRET!, {
+    expiresIn: "1h",
+  });
+
+  console.log("✅ User created:", testUser._id.toString());
+  console.log("✅ User token:", userToken);
 });
 
 afterAll((done) => {
@@ -207,6 +205,7 @@ describe("Posts API Tests", () => {
 
     await newPost.save();
     const savedPost = await postModel.findById(newPost._id);
+    console.log("✅ Saved Post in DB:", savedPost);
 
     const response = await request(app)
       .put(`/posts/like/${newPost._id.toString()}`)
@@ -264,11 +263,29 @@ describe("Posts API Tests", () => {
     expect(response.body).toHaveProperty("message", "Like removed");
   });
 
+  //delete post by id
+  test("Should delete a post by ID (200)", async () => {
+    const response = await request(app)
+      .delete(`/posts/${postId}`)
+      .set("Authorization", `Bearer ${userToken}`);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty(
+      "message",
+      "Post deleted successfully"
+    );
+  });
+
+  test("Should return 404 when deleting a non-existent post", async () => {
+    const response = await request(app)
+      .delete(`/posts/${new mongoose.Types.ObjectId()}`)
+      .set("Authorization", `Bearer ${userToken}`);
+
+    expect(response.statusCode).toBe(404);
+    expect(response.body).toHaveProperty("message", "Post not found");
+  });
 
   test("Should return 500 if an internal server error occurs while deleting a post", async () => {
-    // Silence console.error for this test
-    const originalError = console.error;
-
     const post = await postModel.create({
       postData: "Test post",
       senderId: testUser._id,
@@ -285,9 +302,40 @@ describe("Posts API Tests", () => {
     expect(response.statusCode).toBe(500);
     expect(response.body).toHaveProperty("error", "Internal Server Error");
 
-    // Restore console.error
     jest.restoreAllMocks();
   });
 
+  //delete posts
+  test("Should delete all posts and return 200", async () => {
+    await postModel.create({
+      postData: "Test post",
+      senderId: testUser._id,
+    });
 
+    const response = await request(app)
+      .delete("/posts")
+      .set("Authorization", `Bearer ${userToken}`);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty("deletedCount"); // לבדוק שנמחקו פוסטים
+  });
+
+  test("Should return 400 if an error occurs while deleting posts", async () => {
+    jest.spyOn(postModel, "deleteMany").mockImplementationOnce(() => {
+      throw new Error("Database error");
+    });
+
+    await postModel.create({
+      postData: "Test post",
+      senderId: testUser._id,
+    });
+
+    const response = await request(app)
+      .delete("/posts")
+      .set("Authorization", `Bearer ${userToken}`);
+
+    expect(response.statusCode).toBe(400);
+
+    jest.restoreAllMocks();
+  });
 });
