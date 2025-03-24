@@ -114,11 +114,18 @@ const updateCommentById = async (req: Request, res: Response) => {
 const deleteCommentById = async (req: Request, res: Response) => {
   try {
     const commentId = req.params.commentId;
+    const userIdFromToken = req.params.userId || req.body.userId;
 
     const comment = await commentsModel.findById(commentId);
     if (!comment) {
       res.status(404).json({ error: "Comment not found" });
       return;
+    }
+
+    if (comment.userId.toString() !== userIdFromToken) {
+      return res.status(403).json({
+        error: "Forbidden: You can only delete your own comments",
+      });
     }
 
     const updatedPost = await postModel.findOneAndUpdate(
