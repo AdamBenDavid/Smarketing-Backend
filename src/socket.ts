@@ -103,6 +103,7 @@ export const initializeSocket = (server: HTTPServer) => {
     // Handle chat history request
     socket.on('getChatHistory', async (data: { userId: string, partnerId: string }) => {
       try {
+        console.log('[Socket] Fetching chat history for:', data);
         const messages = await chatMessageModel.find({
           $or: [
             { senderId: data.userId, recipientId: data.partnerId },
@@ -110,8 +111,10 @@ export const initializeSocket = (server: HTTPServer) => {
           ]
         }).sort({ timestamp: 1 });
         
+        console.log('[Socket] Found messages:', messages.length);
         socket.emit('chat_history', messages);
       } catch (error) {
+        console.error('[Socket] Failed to fetch chat history:', error);
         socket.emit('chat_history_error', { error: 'Failed to fetch chat history' });
       }
     });
