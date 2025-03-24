@@ -466,29 +466,24 @@ describe("Auth Tests", () => {
     console.log("🔹 Start update profile picture test");
     console.log("🔹 Test user ID:", user._id.toString());
 
-    try {
-      const filePath = path.resolve(
-        __dirname,
-        "../../images/default-profile.png"
-      );
-      console.log("File path:", filePath);
+    const filePath = path.resolve(
+      __dirname,
+      "../../images/default-profile.png" //random picture
+    );
+    console.log("File path:", filePath);
 
-      const response = await request(app)
-        .put(`/auth/profile/${user._id}`)
-        .set("Authorization", `Bearer ${userToken}`)
-        .set("Content-Type", "multipart/form-data")
-        .attach("profilePicture", filePath);
+    const response = await request(app)
+      .put(`/auth/profile/${user._id}`)
+      .set("Authorization", `Bearer ${userToken}`)
+      .set("Content-Type", "multipart/form-data")
+      .attach("profilePicture", filePath);
 
-      console.log("🔹 Server response:", response.body);
+    console.log("🔹 Server response:", response.body);
 
-      expect(response.statusCode).toBe(200);
-      expect(response.body.user.profilePicture).toContain(
-        "http://localhost:3000/images/default-profile.png"
-      );
-    } catch (err) {
-      console.log("error profile picture update:" + err);
-      console.error("Profile picture update error");
-    }
+    expect(response.statusCode).toBe(200);
+    expect(response.body.user.profilePicture).toContain(
+      "http://localhost:3000/uploads/profile_pictures/"
+    );
   });
 
   //logout

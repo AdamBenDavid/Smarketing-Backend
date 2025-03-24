@@ -2,15 +2,15 @@ import userModel, { User } from "../modules/user_modules";
 import { Request, Response } from "express";
 
 // Create user
-const createUser = async (req: Request, res: Response) => {
-  try {
-    const user = new userModel(req.body);
-    await user.save();
-    res.status(200).send(user);
-  } catch (error) {
-    res.status(400).send(error);
-  }
-};
+// const createUser = async (req: Request, res: Response) => {
+//   try {
+//     const user = new userModel(req.body);
+//     await user.save();
+//     res.status(200).send(user);
+//   } catch (error) {
+//     res.status(400).send(error);
+//   }
+// };
 
 //Read (get) user by id
 const getUserById = async (req: Request, res: Response) => {
@@ -50,7 +50,6 @@ const getAllUsers = async (req: Request, res: Response) => {
 };
 
 export default {
-  createUser,
   getUserById,
   deleteUserById,
   getAllUsers,

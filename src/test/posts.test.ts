@@ -317,7 +317,10 @@ describe("Posts API Tests", () => {
       .set("Authorization", `Bearer ${userToken}`);
 
     expect(response.statusCode).toBe(200);
-    expect(response.body).toHaveProperty("deletedCount"); // לבדוק שנמחקו פוסטים
+    expect(response.body).toHaveProperty(
+      "message",
+      "All posts and images deleted successfully"
+    );
   });
 
   test("Should return 400 if an error occurs while deleting posts", async () => {
@@ -334,7 +337,7 @@ describe("Posts API Tests", () => {
       .delete("/posts")
       .set("Authorization", `Bearer ${userToken}`);
 
-    expect(response.statusCode).toBe(400);
+    expect(response.statusCode).toBe(500);
 
     jest.restoreAllMocks();
   });

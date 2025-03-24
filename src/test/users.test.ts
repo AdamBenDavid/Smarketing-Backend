@@ -38,30 +38,12 @@ afterAll((done) => {
   done();
 });
 
-let userId = "";
-
 describe("User Tests", () => {
-  //create a user
-  test("Test Create User", async () => {
-    const response = await request(app).post("/users").send(testUser);
-    expect(response.statusCode).toBe(200);
-    expect(response.body.email).toBe(testUser.email);
-    expect(response.body.fullName).toBe(testUser.fullName);
-    expect(response.body.password).toBe(testUser.password);
-    userId = response.body._id;
-  });
-
-  test("Should return 400 when creating a user with missing data", async () => {
-    const response = await request(app).post("/users").send({}); // שליחת גוף ריק
-    expect(response.statusCode).toBe(400);
-    expect(response.body).toHaveProperty("message");
-  });
-
   // get all users
   test("User test get all", async () => {
     const response = await request(app).get("/users");
     expect(response.statusCode).toBe(200);
-    expect(response.body.length).toBe(2);
+    expect(response.body.length).toBe(1);
   });
 
   test("Should return 400 when an error occurs while fetching users", async () => {
@@ -80,12 +62,11 @@ describe("User Tests", () => {
 
   // add function- get user by id
   test("Test Get User by Id", async () => {
-    const response = await request(app).get(`/users/${userId}`);
+    const response = await request(app).get(`/users/${testUser._id}`);
     expect(response.statusCode).toBe(200);
-    expect(response.body._id).toBe(userId);
     expect(response.body.email).toBe(testUser.email);
+    expect(response.body._id.toString()).toBe(testUser._id.toString());
     expect(response.body.fullName).toBe(testUser.fullName);
-    expect(response.body.password).toBe(testUser.password);
   });
 
   test("Should return 400 when getting a user with an invalid ID", async () => {
@@ -111,10 +92,10 @@ describe("User Tests", () => {
   // delete user by id
   test("Test Delete User", async () => {
     const response = await request(app)
-      .delete(`/users/${userId}`)
+      .delete(`/users/${testUser._id}`)
       .set({ authorization: "JWT " + userToken });
     expect(response.statusCode).toBe(200);
-    expect(response.body._id).toBe(userId);
+    expect(response.body._id.toString()).toBe(testUser._id.toString());
   });
 
   test("Should return 404 when deleting a non-existent user", async () => {
